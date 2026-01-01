@@ -13,7 +13,7 @@ The UF Cloud Python library provides convenient access to the UF Cloud REST API 
 
 ### Download
 
-[link](https://www.baidu.com)
+[ufcloud-0.0.1-py3-none-any.whl](https://github.com/lixf331/test-api-reference/raw/refs/heads/main/ufcloud-0.0.1-py3-none-any.whl)
 
 ### Installation
 
@@ -21,7 +21,7 @@ The UF Cloud Python library provides convenient access to the UF Cloud REST API 
 pip install --force-reinstall --no-deps --no-cache-dir ufcloud-0.0.1-py3-none-any.whl
 ```
 
-### [Usage](#usage)
+### Usage
 
 Use the library and your secret key to run:
 
@@ -169,25 +169,3 @@ JSON
   }
 }
 ```
-
-## [Groq Community Libraries](#groq-community-libraries)
-
-Groq encourages our developer community to build on our SDK. If you would like your library added, please fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLSfkg3rPUnmZcTwRAS-MsmVHULMtD2I8LwsKPEasuqSsLlF0yA/viewform?usp=sf%5Flink).
-
-Please note that Groq does not verify the security of these projects. **Use at your own risk.**
-
-### [C#](#c)
-
-- [jgravelle.GroqAPILibrary](https://github.com/jgravelle/GroqApiLibrary) by [jgravelle](https://github.com/jgravelle)
-
-### [Dart/Flutter](#dartflutter)
-
-- [TAGonSoft.groq-dart](https://github.com/TAGonSoft/groq-dart) by [TAGonSoft](https://github.com/TAGonSoft)
-
-### [PHP](#php)
-
-- [lucianotonet.groq-php](https://github.com/lucianotonet/groq-php) by [lucianotonet](https://github.com/lucianotonet)
-
-### [Ruby](#ruby)
-
-- [drnic.groq-ruby](https://github.com/drnic/groq-ruby) by [drnic](https://github.com/drnic)

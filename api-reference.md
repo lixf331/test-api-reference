@@ -9,7 +9,7 @@ title: API Reference - UFCloudDocs
 
 ### Create chat completion
 
-**POST** `/openai/v1/chat/completions`
+**POST /openai/v1/chat/completions**
 
 Creates a model response for the given chat conversation.
 

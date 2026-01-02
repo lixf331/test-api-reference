@@ -1216,17 +1216,29 @@ Creates a model response for the given chat conversation.
 
 #### Example Requests
 
-```curl
-curl https://api.ufcloud.io/v1/chat/completions \
-  -H "Authorization: Bearer $UFCLOUD_API_KEY" \
+- cURL
+
+```shell
+curl "http://localhost:8000/openai/v1/chat/completions" \
+  -X POST \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UF_API_KEY}" \
   -d '{
-    "model": "gpt-4",
-    "messages": [
-      {"role": "user", "content": "Hello!"}
-    ]
-  }'
+        "messages": [
+          {
+            "role": "user",
+            "content": ""
+          }
+        ],
+        "model": "",
+        "temperature": 1,
+        "max_tokens": 1024,
+        "top_p": 1,
+        "stream": false
+      }'
 ```
+
+- Python SDK
 
 ```python
 import openai
@@ -1240,6 +1252,78 @@ response = client.chat.completions.create(
     model="gpt-4",
     messages=[{"role": "user", "content": "Hello!"}]
 )
+```
+
+- TypeScript SDK
+
+```python
+import openai
+
+client = openai.OpenAI(
+    api_key="your-api-key",
+    base_url="https://api.ufcloud.io/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+
+```
+
+- OpenAI Python
+
+```python
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "http://localhost:8000/openai/v1",
+  apiKey: "UF_API_KEY"
+});
+
+const chatCompletion = await client.chat.completions.create({
+  "messages": [
+    {
+      "role": "user",
+      "content": ""
+    }
+  ],
+  "model": "",
+  "temperature": 1,
+  "max_tokens": 1024,
+  "top_p": 1,
+  "stream": false
+});
+
+console.log(chatCompletion.choices[0].message.content);
+
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "http://localhost:8000/openai/v1",
+  apiKey: "UF_API_KEY",
+});
+
+const chatCompletion = await client.chat.completions.create({
+  messages: [
+    {
+      role: "user",
+      content: "",
+    },
+  ],
+  model: "",
+  temperature: 1,
+  max_tokens: 1024,
+  top_p: 1,
+  stream: false,
+});
+
+console.log(chatCompletion.choices[0].message.content);
 ```
 
 #### Example Response

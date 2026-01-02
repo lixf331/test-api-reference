@@ -7,7 +7,7 @@ title: API Reference - UFCloudDocs
 
 ## Chat
 
-### Create chat completion
+### Create chat completion test
 
 **POST /openai/v1/chat/completions**
 

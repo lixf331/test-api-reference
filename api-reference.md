@@ -2063,78 +2063,52 @@ Creates a model response for the given input.
       "description": "If set to true, the model response data will be streamed to the client as it is generated using server-sent events."
     },
     "temperature": {
-      "type": "boolean",
-      "default": false,
-      "description": "If true, ignore the EOS (End of Sequence) token and continue generating. When false, generation stops when EOS token is encountered."
+      "type": "number",
+      "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. We generally recommend altering this or top_p but not both."
     },
     "text": {
-      "type": "integer",
-      "description": "The maximum number of tokens that can be generated in the chat completion. The total length of input tokens and generated tokens is limited by the model's context length."
+      "type": "object",
+      "description": "Configuration options for a text response from the model. Can be plain text or structured JSON data."
     },
     "tool_choice": {
-      "type": "integer",
-      "description": "The minimum number of tokens to generate. Generation will continue until at least this many tokens are produced, even if stop sequences or EOS tokens are encountered. Useful for ensuring a minimum response length."
+      "type": "string",
+      "description": "How the model should select which tool (or tools) to use when generating a response. See the tools parameter to see how to specify which tools the model can call."
     },
     "tools": {
-      "type": "boolean",
-      "default": false,
-      "description": "Whether to return log probabilities of the output tokens or not. If true, returns the log probabilities of each output token returned in the content of message."
+      "type": "array",
+      "description": "An array of tools the model may call while generating a response. You can specify which tool to use by setting the tool_choice parameter."
     },
     "top_logprobs": {
       "type": "integer",
-      "description": "Number of most likely tokens to return at each prompt token position, from the end of the prompt. For example, prompt_logprobs=5 will return the top 5 most likely tokens and their log probabilities for the last 5 tokens in the prompt. Useful for analyzing model confidence on input."
+      "description": "An integer between 0 and 20 specifying the number of most likely tokens to return at each token position, each with an associated log probability."
     },
     "top_p": {
-      "type": "boolean",
-      "default": true,
-      "description": "Whether to skip special tokens (e.g., BOS, EOS, padding tokens) in the output text. If true, special tokens are filtered out from the response. If false, special tokens are included in the output, which may be useful for debugging or token-level analysis."
+      "type": "number",
+      "description": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered."
     },
     "truncation": {
-      "type": "boolean",
-      "default": true,
-      "description": "Whether to add spaces between special tokens when decoding. If true, spaces are inserted between special tokens in the output. If false, special tokens are concatenated without spaces. This affects the formatting of the decoded text output."
+      "type": "string",
+      "description": "The truncation strategy to use for the model response."
     },
     "user": {
-      "type": "array",
-      "items": {
-        "anyOf": [
-          {
-            "type": "string",
-            "title": "StringContent"
-          },
-          {
-            "$ref": "#/$defs/LogitsProcessorConstructor"
-          }
-        ]
-      },
-      "title": "Logits Processors",
-      "description": "A list of either qualified names of logits processors, or constructor objects, to apply when sampling. A constructor is a JSON object with a required 'qualname' field specifying the qualified name of the processor class/factory, and optional 'args' and 'kwargs' fields containing positional and keyword arguments. For example: {'qualname': 'my_module.MyLogitsProcessor', 'args': [1, 2], 'kwargs': {'param': 'value'}}."
+      "type": "string",
+      "description": "This field is being replaced by safety_identifier and prompt_cache_key. Use prompt_cache_key instead to maintain caching optimizations. A stable identifier for your end-users. Used to boost cache hit rates by better bucketing similar requests and to help OpenAI detect and prevent abuse. "
     },
     "request_id": {
-      "type": "integer",
-      "minimum": -1,
-      "title": "Truncate Prompt Tokens",
-      "description": "Maximum number of prompt tokens to keep. If prompt exceeds this limit, tokens will be truncated. Use -1 to disable truncation. Positive values truncate from the beginning, keeping the end. Useful when prompt is too long for the model's context window."
+      "type": "string",
+      "description": "A unique identifier for the request. Used to track the request and associate it with a specific response."
     },
     "mm_processor_kwargs": {
-      "type": "string",
-      "enum": ["cumulative", "delta", "final_only"],
-      "title": "Output Kind",
-      "description": "Controls the format of streaming output for incremental text generation. - cumulative: Return the full accumulated text so far (default for most use cases). - delta: Return only the newly generated tokens since the last update (useful for streaming UIs). - final_only: Return only the complete final response, no intermediate updates."
+      "type": "object",
+      "description": "Additional keyword arguments to pass to the model's text generation pipeline. These arguments are specific to the model and may be used to control the generation process, such as temperature, top_p, or nucleus sampling."
     },
     "priority": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "integer"
-      },
-      "description": "Modify the likelihood of specified tokens appearing in the completion. Accepts a JSON object that maps tokens (specified by their token ID in the tokenizer) to an associated bias value from -100 to 100. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token."
+      "type": "integer",
+      "description": "The priority of the request. Higher priority requests are processed before lower priority requests."
     },
     "cache_salt": {
-      "type": "array",
-      "items": {
-        "type": "integer"
-      },
-      "description": "Whitelist of token IDs that can be generated. Only tokens in this list will be considered during sampling. If specified, all other tokens are excluded. Useful for constrained generation, structured output, or limiting output to specific vocabulary (e.g., only numbers, only specific keywords). If null, all tokens are allowed."
+      "type": "string",
+      "description": "A salt value to add to the prompt cache key. This can be used to create a unique cache key for a request."
     }
   },
   "required": ["model", "input"]

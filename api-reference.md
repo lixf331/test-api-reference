@@ -1218,7 +1218,7 @@ Creates a model response for the given chat conversation.
 
 - cURL
 
-```shell
+```curl
 curl "{{ BACKEND_HOST_URL }}/openai/v1/chat/completions" \
   -X POST \
   -H "Content-Type: application/json" \

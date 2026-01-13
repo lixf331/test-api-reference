@@ -2415,7 +2415,7 @@ Creates a model response for the given input.
                 "description": "A summary of the reasoning output from the model so far."
               }
             },
-            "required": ["type", "type"]
+            "required": ["type", "text"]
           }
         },
         "content": {
@@ -3615,6 +3615,25 @@ Creates a model response for the given input.
       },
       "required": ["type"]
     },
+    "MCPToolFilter": {
+      "type": "object",
+      "title": "MCP tool filter",
+      "description": "A filter object to specify which tools are allowed.",
+      "properties": {
+        "tool_names": {
+          "type": "array",
+          "title": "MCP allowed tools",
+          "description": "List of allowed tool names.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "read_only": {
+          "type": "boolean",
+          "description": "Indicates whether or not a tool modifies data or is read-only."
+        }
+      }
+    },
     "MCPTool": {
       "type": "object",
       "title": "MCPTool",
@@ -3693,7 +3712,30 @@ Creates a model response for the given input.
             }
           ]
         },
-        "require_approval": {}
+        "require_approval": {
+          "description": "Specify which of the MCP server's tools require approval.",
+          "anyOf": [
+            {
+              "type": "object",
+              "title": "MCP tool approval filter",
+              "description": "Specify which of the MCP server's tools require approval. Can be `always`, `never`, or a filter object associated with tools that require approval.",
+              "properties": {
+                "always": {
+                  "$ref": "#/$defs/MCPToolFilter"
+                },
+                "never": {
+                  "$ref": "#/$defs/MCPToolFilter"
+                }
+              }
+            },
+            {
+              "type": "string",
+              "title": "MCP tool approval setting",
+              "description": "Specify a single approval policy for all tools. One of `always` or `never`. When set to `always`, all tools will require approval. When set to `never`, all tools will not require approval.",
+              "enum": ["always", "never"]
+            }
+          ]
+        }
       },
       "required": ["type", "server_label"]
     },
@@ -5158,7 +5200,7 @@ Creates a model response for the given input.
                 "description": "A summary of the reasoning output from the model so far."
               }
             },
-            "required": ["type", "type"]
+            "required": ["type", "text"]
           }
         },
         "content": {
@@ -6114,6 +6156,25 @@ Creates a model response for the given input.
       },
       "required": ["type"]
     },
+    "MCPToolFilter": {
+      "type": "object",
+      "title": "MCP tool filter",
+      "description": "A filter object to specify which tools are allowed.",
+      "properties": {
+        "tool_names": {
+          "type": "array",
+          "title": "MCP allowed tools",
+          "description": "List of allowed tool names.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "read_only": {
+          "type": "boolean",
+          "description": "Indicates whether or not a tool modifies data or is read-only."
+        }
+      }
+    },
     "MCPTool": {
       "type": "object",
       "title": "MCPTool",
@@ -6192,7 +6253,30 @@ Creates a model response for the given input.
             }
           ]
         },
-        "require_approval": {}
+        "require_approval": {
+          "description": "Specify which of the MCP server's tools require approval.",
+          "anyOf": [
+            {
+              "type": "object",
+              "title": "MCP tool approval filter",
+              "description": "Specify which of the MCP server's tools require approval. Can be `always`, `never`, or a filter object associated with tools that require approval.",
+              "properties": {
+                "always": {
+                  "$ref": "#/$defs/MCPToolFilter"
+                },
+                "never": {
+                  "$ref": "#/$defs/MCPToolFilter"
+                }
+              }
+            },
+            {
+              "type": "string",
+              "title": "MCP tool approval setting",
+              "description": "Specify a single approval policy for all tools. One of `always` or `never`. When set to `always`, all tools will require approval. When set to `never`, all tools will not require approval.",
+              "enum": ["always", "never"]
+            }
+          ]
+        }
       },
       "required": ["type", "server_label"]
     },
@@ -6838,6 +6922,43 @@ curl "{{ BACKEND_HOST_URL }}/openai/v1/responses" \
         "input": "Tell me a three sentence bedtime story about a unicorn.",
         "model": "openai/gpt-oss-120b"
       }'
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+responses = client.responses.create(
+    input="Tell me a three sentence bedtime story about a unicorn.",
+    model="openai/gpt-oss-120b",
+)
+
+print(responses)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const responses = await client.responses.create({
+  input: "Tell me a three sentence bedtime story about a unicorn.",
+  model: "openai/gpt-oss-120b",
+});
+console.log(responses);
 ```
 
 - OpenAI Python

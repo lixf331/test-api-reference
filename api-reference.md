@@ -7074,3 +7074,286 @@ console.log(response);
   "user": null
 }
 ```
+
+## Embeddings
+
+### Create embeddings
+
+**POST {{ BACKEND_HOST_URL }}/openai/v1/embeddings**
+
+Creates an embedding vector representing the input text.
+
+#### Request Body
+
+```json
+{
+  "title": "CreateEmbeddingRequest",
+  "type": "object",
+  "properties": {
+    "input": {
+      "description": "Single text chunk to embed.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "model": {
+      "description": "ID of the embedding model to use.",
+      "type": "string"
+    },
+    "encoding_format": {
+      "type": "string",
+      "description": "The format to return the embeddings in. Can be either float or base64.",
+      "enum": ["float", "base64"]
+    },
+    "user": {
+      "type": "string",
+      "description": "A unique identifier representing your end-user"
+    },
+    "truncate_prompt_tokens": {
+      "type": "number",
+      "description": "Number of tokens to truncate from the prompt if it exceeds model limits.",
+      "minimum": -1
+    }
+  },
+  "required": ["model", "input"]
+}
+```
+
+#### Response Object
+
+```json
+{
+  "title": "CreateEmbeddingResponse",
+  "type": "object",
+  "$defs": {
+    "EmbeddingData": {
+      "type": "object",
+      "title": "EmbeddingData",
+      "description": "Schema for a single embedding result.",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "description": "Index of the input chunk."
+        },
+        "embedding": {
+          "description": "List of embedding values or a base64 encoded string.",
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "object": {
+          "type": "string",
+          "description": "The object type, which is always \"embedding\".",
+          "enum": ["embedding"]
+        }
+      },
+      "required": ["index", "embedding"]
+    },
+    "UsageInfo": {
+      "type": "object",
+      "title": "UsageInfo",
+      "description": "Usage statistics for the completion request.",
+      "properties": {
+        "prompt_tokens": {
+          "type": "integer",
+          "description": "Number of tokens in the prompt."
+        },
+        "total_tokens": {
+          "type": "integer",
+          "description": "Total number of tokens used in the request (prompt + completion)."
+        },
+        "completion_tokens": {
+          "type": "integer",
+          "description": "Number of tokens in the generated completion."
+        },
+        "prompt_tokens_details": {
+          "type": "object",
+          "description": "Breakdown of tokens in the prompt.",
+          "properties": {
+            "cached_tokens": {
+              "type": "integer",
+              "description": "Number of tokens that were cached and reused."
+            }
+          }
+        }
+      },
+      "required": ["prompt_tokens", "total_tokens"]
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the embedding response."
+    },
+    "model": {
+      "type": "string",
+      "description": "ID of the embedding model used."
+    },
+    "created": {
+      "type": "integer",
+      "description": "Timestamp of when the embeddings were created."
+    },
+    "data": {
+      "type": "array",
+      "description": "List of embedding results.",
+      "items": {
+        "$ref": "#/$defs/EmbeddingData"
+      }
+    },
+    "object": {
+      "type": "string",
+      "description": "The object type, which is always \"list\".",
+      "default": "list"
+    },
+    "usage": {
+      "$ref": "#/$defs/UsageInfo"
+    }
+  },
+  "required": ["id", "model", "data", "object", "usage"]
+}
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/embeddings" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}" \
+  -d '{
+        "input": "The food was delicious and the waiter...",
+        "model": "BAAI/bge-base-en-v1.5",
+        "encoding_format": "float",
+      }'
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+embeddings_response = client.embeddings.create(
+    input="The food was delicious and the waiter...",
+    model="BAAI/bge-base-en-v1.5",
+    encoding_format="float",
+)
+
+print(embeddings_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const embeddingsResponse = await client.embeddings.create({
+  input: "The food was delicious and the waiter...",
+  model: "BAAI/bge-base-en-v1.5",
+  encoding_format: "float",
+});
+console.log(embeddingsResponse);
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+embeddings_response = client.embeddings.create(
+    input="The food was delicious and the waiter...",
+    model="BAAI/bge-base-en-v1.5",
+    encoding_format="float",
+)
+
+print(embeddings_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const embeddingsResponse = await client.embeddings.create({
+  input: "The food was delicious and the waiter...",
+  model: "BAAI/bge-base-en-v1.5",
+  model: "float",
+});
+
+console.log(embeddingsResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "id": "embd-4fc2a1d629594853a5e5dc990c2b21a7",
+  "model": "BAAI/bge-large-en-v1.5",
+  "created": 1766039116,
+  "data": [
+    {
+      "index": 0,
+      "embedding": [
+        0.05032513290643692,
+        0.007264506537467241,
+        ...
+        0.0037901774048805237,
+        -0.03558555245399475,
+        -0.011054683476686478
+      ],
+      "object": "embedding"
+    }
+  ],
+  "object": "list",
+  "usage": {
+    "prompt_tokens": 3,
+    "total_tokens": 3,
+    "completion_tokens": 0,
+    "prompt_token_details": null
+  }
+}
+
+```

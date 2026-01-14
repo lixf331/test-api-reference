@@ -7118,7 +7118,7 @@ Creates an embedding vector representing the input text.
       "description": "A unique identifier representing your end-user"
     },
     "truncate_prompt_tokens": {
-      "type": "number",
+      "type": "integer",
       "description": "Number of tokens to truncate from the prompt if it exceeds model limits.",
       "minimum": -1
     }
@@ -7356,4 +7356,335 @@ console.log(embeddingsResponse);
   }
 }
 
+```
+
+## Rerank
+
+### Create A Rerank Request
+
+**POST {{ BACKEND_HOST_URL }}/v1/rerank**
+
+Query a reranker model.
+
+#### Request Body
+
+```json
+{
+  "title": "CreateRerankRequest",
+  "type": "object",
+  "properties": {
+    "model": {
+      "description": "ID of the reranking model to use.",
+      "type": "string"
+    },
+    "query": {
+      "type": "string",
+      "description": "The query string to rerank documents against."
+    },
+    "documents": {
+      "type": "array",
+      "description": "A list of document texts to be reranked.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "top_n": {
+      "type": "number",
+      "description": "The number of top results to return."
+    },
+    "truncate_prompt_tokens": {
+      "type": "number",
+      "minimum": -1,
+      "description": "Number of tokens to truncate from the prompt if it exceeds model limits."
+    },
+    "mm_processor_kwargs": {
+      "type": "object",
+      "description": "Optional multi-modal processor parameters."
+    },
+    "priority": {
+      "type": "integer",
+      "description": "Priority of the request."
+    }
+  },
+  "required": ["model", "query", "documents"]
+}
+```
+
+#### Response Object
+
+```json
+{
+  "title": "CreateRerankResponse",
+  "type": "object",
+  "$defs": {
+    "ImageURL": {
+      "type": "object",
+      "title": "ImageURL",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["auto", "low", "high"]
+        }
+      },
+      "required": ["url"]
+    },
+    "ChatCompletionContentPartImageEmbedsParam": {
+      "type": "object",
+      "title": "ChatCompletionContentPartImageEmbedsParam",
+      "description": "A specialized parameter type for scoring image embeds content.",
+      "properties": {
+        "image_embeds": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["image_embeds"]
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "required": ["type"]
+    },
+    "ChatCompletionContentPartImageParam": {
+      "type": "object",
+      "properties": {
+        "image_url": {
+          "$ref": "#/$defs/ImageURL"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["image_url"],
+          "title": "Type"
+        }
+      },
+      "required": ["image_url", "type"],
+      "title": "ChatCompletionContentPartImageParam"
+    },
+    "ScoreContentPartParam": {
+      "type": "object",
+      "title": "ScoreContentPartParam",
+      "description": "A specialized parameter type for scoring multimodal content.",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ChatCompletionContentPartImageParam"
+              },
+              {
+                "$ref": "#/$defs/ChatCompletionContentPartImageEmbedsParam"
+              }
+            ]
+          }
+        }
+      },
+      "required": ["content"]
+    },
+    "RerankDocument": {
+      "type": "object",
+      "title": "RerankDocument",
+      "description": "Schema for a document in reranking responses.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The content of the document."
+        },
+        "multi_modal": {
+          "description": "Optional multi-modal data associated with the document.",
+          "$ref": "#/$defs/ScoreContentPartParam"
+        }
+      }
+    },
+    "RerankResult": {
+      "type": "object",
+      "title": "RerankResult",
+      "description": "Schema for a single reranking result.",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "description": "The original index of the document in the request."
+        },
+        "relevance_score": {
+          "type": "number",
+          "format": "float",
+          "description": "The relevance score assigned by the reranking model."
+        },
+        "document": {
+          "$ref": "#/$defs/RerankDocument"
+        }
+      },
+      "required": ["index", "relevance_score", "document"]
+    },
+    "RerankUsageInfo": {
+      "type": "object",
+      "title": "RerankUsageInfo",
+      "description": "Token usage information.",
+      "properties": {
+        "total_tokens": {
+          "type": "integer",
+          "description": "Total tokens consumed."
+        }
+      },
+      "required": ["total_tokens"]
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the reranking response."
+    },
+    "model": {
+      "type": "string",
+      "description": "ID of the reranking model used."
+    },
+    "results": {
+      "type": "array",
+      "description": "A list of reranking results.",
+      "items": {
+        "$ref": "#/$defs/RerankResult"
+      }
+    },
+    "usage": {
+      "$ref": "#/$defs/RerankUsageInfo"
+    }
+  },
+  "required": ["id", "model", "results", "usage"]
+}
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/v1/rerank" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}" \
+  -d '{
+        "model": "BAAI/bge-reranker-v2-m3",
+        "query": "What animals can I find near Peru?",
+        "documents": [
+          "The llama is a domesticated South American camelid, widely used as a meat and pack animal by Andean cultures since the pre-Columbian era.",
+          "The giant panda (Ailuropoda melanoleuca), also known as the panda bear or simply panda, is a bear species endemic to China.",
+          "The guanaco is a camelid native to South America, closely related to the llama. Guanacos are one of two wild South American camelids; the other species is the vicuña, which lives at higher elevations.",
+          "The wild Bactrian camel (Camelus ferus) is an endangered species of camel endemic to Northwest China and southwestern Mongolia."
+        ],
+      }'
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+rerank_response = client.rerank.create(
+    query="What animals can I find near Peru?",
+    documents=[
+        "The llama is a domesticated South American camelid, widely used as a meat and pack animal by Andean cultures since the pre-Columbian era.",
+        "The giant panda (Ailuropoda melanoleuca), also known as the panda bear or simply panda, is a bear species endemic to China.",
+        "The guanaco is a camelid native to South America, closely related to the llama. Guanacos are one of two wild South American camelids; the other species is the vicuña, which lives at higher elevations.",
+        "The wild Bactrian camel (Camelus ferus) is an endangered species of camel endemic to Northwest China and southwestern Mongolia."
+    ],
+    model="BAAI/bge-reranker-v2-m3"
+)
+
+for result in rerank_response.results:
+    print(f"Rank: {result.index + 1}")
+    print(f"Text: {result.document.text}")
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const rerankResponse = await client.rerank.create({
+  query: "What animals can I find near Peru?",
+  documents: [
+    "The llama is a domesticated South American camelid, widely used as a meat and pack animal by Andean cultures since the pre-Columbian era.",
+    "The giant panda (Ailuropoda melanoleuca), also known as the panda bear or simply panda, is a bear species endemic to China.",
+    "The guanaco is a camelid native to South America, closely related to the llama. Guanacos are one of two wild South American camelids; the other species is the vicuña, which lives at higher elevations.",
+    "The wild Bactrian camel (Camelus ferus) is an endangered species of camel endemic to Northwest China and southwestern Mongolia.",
+  ],
+  model: "BAAI/bge-reranker-v2-m3",
+});
+
+for (const result of rerankResponse.results) {
+  console.log(`Rank: ${result.index + 1}`);
+  console.log(`Text: ${result.document.text}`);
+}
+```
+
+#### Example Response
+
+```json
+{
+  "id": "rerank-dc4b0344770d431f95ef24ba8b323890",
+  "model": "BAAI/bge-reranker-v2-m3",
+  "results": [
+    {
+      "index": 0,
+      "relevance_score": 0.00001703249290585518,
+      "document": {
+        "text": "The llama is a domesticated South American camelid, widely used as a meat and pack animal by Andean cultures since the pre-Columbian era.",
+        "multi_modal": null
+      }
+    },
+    {
+      "index": 3,
+      "relevance_score": 0.000016559604773647152,
+      "document": {
+        "text": "The wild Bactrian camel (Camelus ferus) is an endangered species of camel endemic to Northwest China and southwestern Mongolia.",
+        "multi_modal": null
+      }
+    },
+    {
+      "index": 2,
+      "relevance_score": 0.000016478190445923246,
+      "document": {
+        "text": "The guanaco is a camelid native to South America, closely related to the llama. Guanacos are one of two wild South American camelids; the other species is the vicuña, which lives at higher elevations.",
+        "multi_modal": null
+      }
+    },
+    {
+      "index": 1,
+      "relevance_score": 0.000016432932170573622,
+      "document": {
+        "text": "The giant panda (Ailuropoda melanoleuca), also known as the panda bear or simply panda, is a bear species endemic to China.",
+        "multi_modal": null
+      }
+    }
+  ],
+  "usage": {
+    "total_tokens": 200
+  }
+}
 ```

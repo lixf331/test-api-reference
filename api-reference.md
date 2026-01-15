@@ -7688,3 +7688,578 @@ for (const result of rerankResponse.results) {
   }
 }
 ```
+
+## Fine Tuning
+
+### Create fine tuning
+
+**POST {{ BACKEND_HOST_URL }}/v1/fine-tuning/jobs**
+
+Create a fine-tuning job with the provided model and training data.
+
+#### Request Body
+
+```json
+{
+  "title": "FineTuneJobCreate",
+  "type": "object",
+  "$defs": {
+    "Hyperparameters": {
+      "type": "object",
+      "title": "Hyperparameters",
+      "description": "Schema for the hyperparameters of a fine-tuning job.",
+      "properties": {
+        "lora_rank": {
+          "type": "integer",
+          "default": 16,
+          "description": "Controls the rank of the low-rank matrices. Lower values are more parameter-efficient, higher values may improve model capacity and performance."
+        },
+        "lora_alpha": {
+          "type": "integer",
+          "default": 32,
+          "description": "Scaling factor that affects the magnitude of weight updates during training (higher values can lead to faster convergence but may cause instability)"
+        },
+        "lora_dropout": {
+          "type": "number",
+          "default": 0.05
+        },
+        "lora_target_modules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj"
+          ]
+        },
+        "training_method": {
+          "type": "string",
+          "default": "sft",
+          "description": "The training method to use. 'sft' for Supervised Fine-Tuning or 'dpo' for Direct Preference Optimization."
+        },
+        "train_on_inputs": {
+          "type": "string",
+          "default": "auto",
+          "description": "Whether to mask the user messages in conversational data or prompts in instruction data."
+        },
+        "epochs": {
+          "type": "integer",
+          "default": 3,
+          "description": "Number of complete passes through the training dataset (higher values may improve results but increase cost and risk of overfitting)"
+        },
+        "n_checkpoints": {
+          "type": "integer",
+          "default": 1,
+          "description": "Number of intermediate model versions saved during training for evaluation."
+        },
+        "n_evals": {
+          "type": "integer",
+          "default": 1,
+          "description": "Number of evaluations to be run on a given validation set during training."
+        },
+        "batch_size": {
+          "type": "integer",
+          "default": 8,
+          "description": "Number of training examples processed together (larger batches use more memory but may train faster)."
+        },
+        "gradient_accumulation_steps": {
+          "type": "integer",
+          "default": 1
+        },
+        "lr_scheduler_type": {
+          "type": "string",
+          "default": "cosine"
+        },
+        "lr_scheduler_args": {
+          "type": "object",
+          "description": "The ratio of the final learning rate to the peak learning rate.",
+          "additionalProperties": true,
+          "default": {
+            "num_cycles": 0.5
+          }
+        },
+        "learning_rate": {
+          "type": "number",
+          "default": 0.00001,
+          "description": "Controls how quickly the model adapts to new information. Too high may cause instability, too low may slow convergence."
+        },
+        "warmup_ratio": {
+          "type": "number",
+          "default": 0,
+          "description": "The percent of steps at the start of training to linearly increase the learning rate."
+        },
+        "max_grad_norm": {
+          "type": "number",
+          "default": 1,
+          "description": "Max gradient norm to be used for gradient clipping."
+        },
+        "weight_decay": {
+          "type": "number",
+          "description": "Weight decay. Regularization parameter for the optimizer.",
+          "default": 0
+        },
+        "max_seq_len": {
+          "type": "integer",
+          "default": 4096
+        }
+      }
+    }
+  },
+  "properties": {
+    "org_id": {
+      "type": "string",
+      "description": "The ID of the organization to associate the fine-tuning job with."
+    },
+    "model": {
+      "description": "The name of the model to fine-tune.",
+      "type": "string"
+    },
+    "suffix": {
+      "type": "string",
+      "description": "The suffix to add to the model name."
+    },
+    "type": {
+      "type": "string",
+      "default": "lora"
+    },
+    "status": {
+      "type": "string",
+      "description": "Enum for the status of a fine-tuning job.",
+      "enum": [
+        "PENDING",
+        "QUEUED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "INVALID_INPUT"
+      ],
+      "default": "PENDING"
+    },
+    "training_file_id": {
+      "type": "string",
+      "description": "File-ID of the training file"
+    },
+    "validation_file_id": {
+      "type": "string",
+      "description": "File-ID of the validation file"
+    },
+    "hyperparams": {
+      "$ref": "#/$defs/Hyperparameters"
+    }
+  },
+  "required": ["model", "training_file_id"]
+}
+```
+
+#### Response Object
+
+```json
+{
+  "title": "FineTuneJobCreationSummary",
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Unique identifier for the fine-tune job."
+    },
+    "model": {
+      "description": "The name of the model to fine-tune.",
+      "type": "string"
+    },
+    "suffix": {
+      "type": "string",
+      "description": "The suffix to add to the model name."
+    },
+    "type": {
+      "type": "string",
+      "default": "lora"
+    },
+    "status": {
+      "type": "string",
+      "description": "Enum for the status of a fine-tuning job.",
+      "enum": [
+        "PENDING",
+        "QUEUED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "INVALID_INPUT"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "description": "Creation timestamp of the fine-tune job."
+    }
+  },
+  "required": ["job_id", "model", "type", "status", "created_at"]
+}
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/v1/fine-tuning/jobs" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}" \
+  -d '{
+        "training_file_id": "file-3567df42-9633-4658-b3f8-a91825e2f5c2",
+        "model": "google/gemma-2b",
+        "hyperparams": {
+          "lora_rank": 8,
+          "lora_alpha": 16,
+          "lora_dropout": 0.05,
+          "lora_target_modules": [
+            "q_proj"
+          ],
+          "training_method": "sft",
+          "train_on_inputs": "auto",
+          "epochs": 2,
+          "n_checkpoints": 1,
+          "n_evals": 1,
+          "batch_size": 1,
+          "gradient_accumulation_steps": 1,
+          "lr_scheduler_type": "cosine",
+          "lr_scheduler_args": {
+            "num_cycles": 0.5
+          },
+          "learning_rate": 0.00001,
+          "warmup_ratio": 0,
+          "max_grad_norm": 1,
+          "weight_decay": 0,
+          "max_seq_len": 1024
+        }
+      }'
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+fine_tuning_create_response = client.fine_tuning.create(
+    model="google/gemma-2b",
+    training_file_id="file-3567df42-9633-4658-b3f8-a91825e2f5c2",
+    hyperparams={
+        "lora_rank": 8,
+        "lora_alpha": 16,
+        "lora_dropout": 0.05,
+        "lora_target_modules": ["q_proj"],
+        "training_method": "sft",
+        "train_on_inputs": "auto",
+        "epochs": 2,
+        "n_checkpoints": 1,
+        "n_evals": 1,
+        "batch_size": 1,
+        "gradient_accumulation_steps": 1,
+        "lr_scheduler_type": "cosine",
+        "lr_scheduler_args": {
+            "num_cycles": 0.5,
+        },
+        "learning_rate": 1e-05,
+        "warmup_ratio": 0.0,
+        "max_grad_norm": 1.0,
+        "weight_decay": 0.0,
+        "max_seq_len": 1024,
+    },
+)
+
+print(fine_tuning_create_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const fineTuningCreateResponse = await client.fineTuning.create({
+  model: "google/gemma-2b",
+  training_file_id: "file-3567df42-9633-4658-b3f8-a91825e2f5c2",
+  hyperparams: {
+    lora_rank: 8,
+    lora_alpha: 16,
+    lora_dropout: 0.05,
+    lora_target_modules: ["q_proj"],
+    training_method: "sft",
+    train_on_inputs: "auto",
+    epochs: 2,
+    n_checkpoints: 1,
+    n_evals: 1,
+    batch_size: 2,
+    gradient_accumulation_steps: 1,
+    lr_scheduler_type: "cosine",
+    lr_scheduler_args: {
+      num_cycles: 0.5,
+    },
+    learning_rate: 1e-5,
+    warmup_ratio: 0.0,
+    max_grad_norm: 1.0,
+    weight_decay: 0.0,
+    max_seq_len: 4096,
+  },
+});
+console.log(fineTuningCreateResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "job": {
+    "job_id": "ft-9e8c931e-6c22-4b41-ba7f-54fc3d4c6a0f",
+    "model": "google/gemma-2b",
+    "suffix": null,
+    "type": "lora",
+    "status": "PENDING",
+    "created_at": "2026-01-15T01:37:09.054000"
+  }
+}
+```
+
+### List fine tunings
+
+**GET {{ BACKEND_HOST_URL }}/v1/fine-tuning/jobs**
+
+List all Fine-Tuning Jobs for the organization.
+
+#### Query
+
+```json
+{
+  "title": "FineTuneJobQuery",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "description": "Filter by job status.",
+      "enum": [
+        "PENDING",
+        "QUEUED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "INVALID_INPUT"
+      ]
+    },
+    "model": {
+      "description": "Filter by model name",
+      "type": "string"
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "Page number, 1-based"
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Items per page, max 100",
+      "maximum": 100,
+      "minimum": 1,
+      "default": 20
+    }
+  }
+}
+```
+
+#### Response Object
+
+```json
+{
+  "title": "FineTuneJobList",
+  "type": "object",
+  "$defs": {
+    "FineTuneJobSummary": {
+      "type": "object",
+      "title": "FineTuneJobSummary",
+      "description": "A concise summary of a fine-tuning job, used for list views.",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "Unique identifier for the fine-tune job."
+        },
+        "model": {
+          "description": "The name of the model to fine-tune.",
+          "type": "string"
+        },
+        "suffix": {
+          "type": "string",
+          "description": "The suffix to add to the model name."
+        },
+        "type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "description": "Enum for the status of a fine-tuning job.",
+          "enum": [
+            "PENDING",
+            "QUEUED",
+            "RUNNING",
+            "COMPLETED",
+            "FAILED",
+            "INVALID_INPUT"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Creation timestamp of the fine-tune job."
+        },
+        "runtime_seconds": {
+          "type": "integer",
+          "description": "Total runtime of the fine-tune job in seconds."
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "Last update timestamp of the fine-tune job."
+        }
+      },
+      "required": [
+        "job_id",
+        "model",
+        "type",
+        "status",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  },
+  "properties": {
+    "data": {
+      "type": "array",
+      "description": "List of fine-tune jobs.",
+      "items": {
+        "$ref": "#/$defs/FineTuneJobSummary"
+      }
+    },
+    "page": {
+      "type": "integer",
+      "description": "Current page number (1-based)"
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Items per page"
+    },
+    "has_next": {
+      "type": "boolean",
+      "description": "True if more pages exist"
+    },
+    "total": {
+      "type": "integer",
+      "description": "Total count of items"
+    },
+    "count": {
+      "type": "integer",
+      "description": "Count of items returned so far"
+    }
+  },
+  "required": ["data", "page", "limit", "has_next"]
+}
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/v1/fine-tuning/jobs" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+fine_tuning_list_response = client.fine_tuning.list()
+for fine_tuning in fine_tuning_list_response:
+    print(fine_tuning)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const fineTuningListResponse = await client.fineTuning.list();
+for await (const fineTuning of fineTuningListResponse) {
+  console.log(fineTuning);
+}
+```
+
+#### Example Response
+
+```json
+{
+  "data": [
+    {
+      "job_id": "ft-9e8c931e-6c22-4b41-ba7f-54fc3d4c6a0f",
+      "model": "google/gemma-2b",
+      "suffix": null,
+      "type": "lora",
+      "status": "COMPLETED",
+      "created_at": "2026-01-15T01:37:09.054000",
+      "runtime_seconds": 29,
+      "updated_at": "2026-01-15T01:38:14.526000"
+    },
+    {
+      "job_id": "ft-0c399d27-e869-4cc6-9389-173a168512d7",
+      "model": "google/gemma-2b",
+      "suffix": "test",
+      "type": "lora",
+      "status": "COMPLETED",
+      "created_at": "2026-01-14T06:57:04.893000",
+      "runtime_seconds": 29,
+      "updated_at": "2026-01-14T06:58:12.106000"
+    },
+    {
+      "job_id": "ft-094ae485-8f9d-4368-a73e-0f2e52c79605",
+      "model": "google/gemma-2b",
+      "suffix": null,
+      "type": "lora",
+      "status": "COMPLETED",
+      "created_at": "2026-01-05T00:59:19.776000",
+      "runtime_seconds": 30,
+      "updated_at": "2026-01-05T01:00:33.369000"
+    }
+  ],
+  "page": 1,
+  "limit": 20,
+  "has_next": false,
+  "total": 3,
+  "count": 3
+}
+```

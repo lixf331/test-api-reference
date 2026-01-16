@@ -9053,3 +9053,157 @@ client.fineTuning.downloadAdapter("ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c", {
   "checkpoints": []
 }
 ```
+
+### Get fine tuning models
+
+**GET {{ BACKEND_HOST_URL }}/v1/finetune/models/supported**
+
+Returns a list of models available for fine-tuning.
+
+#### Request Parameters
+
+```json
+{
+  "title": "FineTuneJobModelsRequest",
+  "type": "object",
+  "properties": {
+    "family": {
+      "type": "string",
+      "description": "model family to filter by"
+    }
+  }
+}
+```
+
+#### Response Object
+
+```json
+{
+  "title": "ListFineTuningModelsResponse",
+  "type": "object",
+  "$defs": {
+    "FineTuningModelCatalogResponse": {
+      "type": "object",
+      "title": "FineTuningModelCatalogResponse",
+      "description": "Response for a single fine-tuning model.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the fine-tuning model."
+        },
+        "family": {
+          "type": "string",
+          "description": "Family of the fine-tuning model."
+        },
+        "parameters_billion": {
+          "type": "number",
+          "description": "Number of parameters in the fine-tuning model."
+        },
+        "max_seq_len": {
+          "type": "integer",
+          "description": "Maximum sequence length of the fine-tuning model."
+        },
+        "max_lora_rank": {
+          "type": "integer",
+          "description": "Maximum LORA rank of the fine-tuning model."
+        },
+        "default_gpu_type": {
+          "type": "string",
+          "description": "Default GPU type of the fine-tuning model."
+        },
+        "default_gpu_count": {
+          "type": "integer",
+          "description": "Default GPU count of the fine-tuning model."
+        }
+      },
+      "required": [
+        "name",
+        "family",
+        "parameters_billion",
+        "max_seq_len",
+        "max_lora_rank",
+        "default_gpu_type",
+        "default_gpu_count"
+      ]
+    }
+  },
+  "properties": {
+    "models": {
+      "type": "array",
+      "description": "list of fine-tuning models",
+      "items": {
+        "$ref": "#/$defs/FineTuningModelCatalogResponse"
+      }
+    }
+  },
+  "required": ["models"]
+}
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/v1/finetune/models/supported" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+fine_tuning_models_response = client.fine_tuning.models.list()
+print(fine_tuning_models_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const fineTuningModelsResponse = await client.fineTuning.models.list();
+console.log(fineTuningModelsResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "models": [
+    {
+      "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+      "family": "tiny",
+      "parameters_billion": 1.1,
+      "max_seq_len": 2048,
+      "max_lora_rank": 128,
+      "default_gpu_type": "L40S",
+      "default_gpu_count": 1
+    },
+    {
+      "name": "Qwen/Qwen2.5-1.5B-Instruct",
+      "family": "tiny",
+      "parameters_billion": 1.5,
+      "max_seq_len": 2048,
+      "max_lora_rank": 128,
+      "default_gpu_type": "L40S",
+      "default_gpu_count": 1
+    },
+    ...
+  ]
+}
+```

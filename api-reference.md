@@ -8042,7 +8042,7 @@ console.log(fineTuningCreateResponse);
 
 List all Fine-Tuning Jobs for the organization.
 
-#### Query
+#### Query Parameters
 
 ```json
 {
@@ -8261,5 +8261,795 @@ for await (const fineTuning of fineTuningListResponse) {
   "has_next": false,
   "total": 3,
   "count": 3
+}
+```
+
+### Get fine tuning
+
+**GET {{ BACKEND_HOST_URL }}/v1/fine-tuning/jobs/{job_id}**
+
+Get details for a specific Fine-Tuning Job including associated events and artifacts.
+
+#### Path Parameters
+
+```json
+{
+  "title": "FineTuneJobPath",
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Unique identifier for the fine-tune job."
+    }
+  },
+  "required": ["job_id"]
+}
+```
+
+#### Response Object
+
+```json
+{
+  "title": "FineTuneJobDetail",
+  "type": "object",
+  "$defs": {
+    "Hyperparameters": {
+      "type": "object",
+      "title": "Hyperparameters",
+      "description": "Schema for the hyperparameters of a fine-tuning job.",
+      "properties": {
+        "lora_rank": {
+          "type": "integer",
+          "default": 16,
+          "description": "Controls the rank of the low-rank matrices. Lower values are more parameter-efficient, higher values may improve model capacity and performance."
+        },
+        "lora_alpha": {
+          "type": "integer",
+          "default": 32,
+          "description": "Scaling factor that affects the magnitude of weight updates during training (higher values can lead to faster convergence but may cause instability)"
+        },
+        "lora_dropout": {
+          "type": "number",
+          "default": 0.05
+        },
+        "lora_target_modules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj"
+          ]
+        },
+        "training_method": {
+          "type": "string",
+          "default": "sft",
+          "description": "The training method to use. 'sft' for Supervised Fine-Tuning or 'dpo' for Direct Preference Optimization."
+        },
+        "train_on_inputs": {
+          "type": "string",
+          "default": "auto",
+          "description": "Whether to mask the user messages in conversational data or prompts in instruction data."
+        },
+        "epochs": {
+          "type": "integer",
+          "default": 3,
+          "description": "Number of complete passes through the training dataset (higher values may improve results but increase cost and risk of overfitting)"
+        },
+        "n_checkpoints": {
+          "type": "integer",
+          "default": 1,
+          "description": "Number of intermediate model versions saved during training for evaluation."
+        },
+        "n_evals": {
+          "type": "integer",
+          "default": 1,
+          "description": "Number of evaluations to be run on a given validation set during training."
+        },
+        "batch_size": {
+          "type": "integer",
+          "default": 8,
+          "description": "Number of training examples processed together (larger batches use more memory but may train faster)."
+        },
+        "gradient_accumulation_steps": {
+          "type": "integer",
+          "default": 1
+        },
+        "lr_scheduler_type": {
+          "type": "string",
+          "default": "cosine"
+        },
+        "lr_scheduler_args": {
+          "type": "object",
+          "description": "The ratio of the final learning rate to the peak learning rate.",
+          "additionalProperties": true,
+          "default": {
+            "num_cycles": 0.5
+          }
+        },
+        "learning_rate": {
+          "type": "number",
+          "default": 0.00001,
+          "description": "Controls how quickly the model adapts to new information. Too high may cause instability, too low may slow convergence."
+        },
+        "warmup_ratio": {
+          "type": "number",
+          "default": 0,
+          "description": "The percent of steps at the start of training to linearly increase the learning rate."
+        },
+        "max_grad_norm": {
+          "type": "number",
+          "default": 1,
+          "description": "Max gradient norm to be used for gradient clipping."
+        },
+        "weight_decay": {
+          "type": "number",
+          "description": "Weight decay. Regularization parameter for the optimizer.",
+          "default": 0
+        },
+        "max_seq_len": {
+          "type": "integer",
+          "default": 4096
+        }
+      }
+    }
+  },
+  "properties": {
+    "org_id": {
+      "type": "string",
+      "description": "The ID of the organization to associate the fine-tuning job with."
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the fine-tune job."
+    },
+    "job_id": {
+      "type": "string",
+      "description": "Unique identifier for the fine-tune job."
+    },
+    "created_at": {
+      "type": "string",
+      "description": "Creation timestamp of the fine-tune job."
+    },
+    "updated_at": {
+      "type": "string",
+      "description": "Last update timestamp of the fine-tune job."
+    },
+    "started_at": {
+      "type": "string",
+      "description": "Timestamp when the fine-tune job started."
+    },
+    "finished_at": {
+      "type": "string",
+      "description": "Timestamp when the fine-tune job finished."
+    },
+    "runtime_seconds": {
+      "type": "integer",
+      "description": "Total runtime of the fine-tune job in seconds."
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Schema for the metrics of a fine-tuning job.",
+      "properties": {
+        "train_tokens": {
+          "type": "integer"
+        },
+        "eval_tokens": {
+          "type": "integer"
+        },
+        "epochs_completed": {
+          "type": "integer"
+        },
+        "steps_completed": {
+          "type": "integer"
+        },
+        "final_train_loss": {
+          "type": "number"
+        },
+        "eval_loss": {
+          "type": "number"
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "description": "Schema for the artifacts of a fine-tuning job.",
+      "properties": {
+        "final_adapter": {
+          "type": "object",
+          "description": "Schema for the final adapter artifact.",
+          "title": "FinalAdapter",
+          "properties": {
+            "artifact_type": {
+              "type": "string",
+              "enum": ["adapter"]
+            },
+            "created_at": {
+              "type": "string"
+            },
+            "download_url": {
+              "type": "string"
+            }
+          },
+          "required": ["artifact_type", "created_at", "download_url"]
+        },
+        "checkpoints": {
+          "type": "array",
+          "title": "Checkpoints",
+          "description": "Schema for the checkpoints of a fine-tuning job.",
+          "default": [],
+          "items": {
+            "type": "object",
+            "description": "Schema for a checkpoint artifact.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "artifact_type": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "download_url": {
+                "type": "string"
+              }
+            },
+            "required": ["name", "artifact_type", "created_at", "download_url"]
+          }
+        }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "description": "Schema for the canonical usage telemetry block of a fine-tuning job.",
+      "properties": {
+        "gpu_type": {
+          "type": "string"
+        },
+        "gpu_count": {
+          "type": "integer"
+        },
+        "gpu_start_at": {
+          "type": "string"
+        },
+        "gpu_end_at": {
+          "type": "string"
+        },
+        "gpu_seconds": {
+          "type": "integer"
+        },
+        "gpu_hours": {
+          "type": "number"
+        },
+        "train_tokens": {
+          "type": "integer"
+        },
+        "eval_tokens": {
+          "type": "integer"
+        },
+        "tokens_per_step": {
+          "type": "integer"
+        },
+        "max_seq_len": {
+          "type": "integer"
+        },
+        "total_steps": {
+          "type": "integer"
+        },
+        "dataset": {
+          "type": "object",
+          "title": "UsageDataset",
+          "description": "Schema for the dataset usage of a fine-tuning job.",
+          "properties": {
+            "line_count": {
+              "type": "integer"
+            },
+            "size_bytes": {
+              "type": "integer"
+            },
+            "tokens_estimated": {
+              "type": "integer"
+            },
+            "schema_type": {
+              "type": "string",
+              "enum": ["instruction", "messages"]
+            }
+          }
+        },
+        "artifacts": {
+          "type": "object",
+          "title": "UsageArtifacts",
+          "description": "Schema for the artifact usage of a fine-tuning job.",
+          "properties": {
+            "adapter_size_bytes": {
+              "type": "integer"
+            },
+            "num_checkpoints": {
+              "type": "integer"
+            },
+            "checkpoint_sizes": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "runtime_seconds": {
+          "type": "integer"
+        },
+        "errors": {
+          "type": "object",
+          "title": "UsageErrors",
+          "description": "Schema for the errors in the usage block of a fine-tuning job.",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["user_error", "system_error", "none"]
+            },
+            "message": {
+              "type": "string"
+            },
+            "stack": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "errors": {
+      "type": "object",
+      "description": "Schema for the errors of a fine-tuning job.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["user_error", "system_error", "none"]
+        },
+        "message": {
+          "type": "string"
+        },
+        "stack": {
+          "type": "string"
+        }
+      }
+    },
+    "error_type": {
+      "type": "string",
+      "description": "Enum for the type of error in a fine-tuning job.",
+      "enum": ["user_error", "system_error"]
+    },
+    "error_code": {
+      "type": "string"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "suffix": {
+      "type": "string",
+      "description": "The suffix to add to the model name."
+    },
+    "type": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "description": "Enum for the status of a fine-tuning job.",
+      "enum": [
+        "PENDING",
+        "QUEUED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "INVALID_INPUT"
+      ]
+    },
+    "training_file_id": {
+      "type": "string",
+      "description": "File-ID of the training file"
+    },
+    "validation_file_id": {
+      "type": "string",
+      "description": "File-ID of the validation file"
+    },
+    "hyperparams": {
+      "$ref": "#/$defs/Hyperparameters"
+    },
+    "model": {
+      "type": "string",
+      "description": "The name of the model to fine-tune."
+    },
+    "events": {
+      "type": "array",
+      "description": "Schema representing a fine-tuning event as stored in the database.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "JOB_PENDING",
+              "JOB_START",
+              "MODEL_DOWNLOADING",
+              "MODEL_DOWNLOAD_COMPLETE",
+              "TRAINING_DATA_DOWNLOADING",
+              "TRAINING_DATA_READY",
+              "PRECHECK_COMPLETE",
+              "TRAINING_START",
+              "EPOCH_COMPLETE",
+              "EVAL_COMPLETE",
+              "TRAINING_COMPLETE",
+              "COMPRESSING_ADAPTER",
+              "ADAPTER_COMPRESSION_COMPLETE",
+              "MODEL_UPLOADING",
+              "MODEL_UPLOAD_COMPLETE",
+              "JOB_COMPLETE",
+              "JOB_USER_ERROR",
+              "JOB_SYSTEM_ERROR"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "metadata": {
+            "oneOf": [
+              {
+                "type": "object",
+                "title": "FineTuneEventMetadata",
+                "description": "Schema for the metadata of a fine-tuning event.",
+                "properties": {
+                  "model_name": {
+                    "type": "string"
+                  },
+                  "epoch": {
+                    "type": "integer"
+                  },
+                  "global_step": {
+                    "type": "integer"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              }
+            ]
+          }
+        },
+        "required": ["id", "job_id", "org_id", "event_type", "message"]
+      }
+    }
+  },
+  "required": [
+    "org_id",
+    "id",
+    "job_id",
+    "created_at",
+    "updated_at",
+    "status",
+    "training_file_id"
+  ]
+}
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/v1/fine-tuning/jobs/ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+fine_tuning_get_response = client.fine_tuning.retrieve(
+    job_id="ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c"
+)
+print(fine_tuning_get_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const fineTuningRetrieveResponse = await client.fineTuning.retrieve(
+  "ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c"
+);
+console.log(fineTuningRetrieveResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "job": {
+    "org_id": "69291de48168a67217cb381b",
+    "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "suffix": null,
+    "type": "lora",
+    "status": "COMPLETED",
+    "training_file_id": "file-f6cc619e-4dcd-4b8f-9544-d1399dc9c317",
+    "validation_file_id": "file-21050a8a-d00c-4677-bc4d-d8b9ce927d4c",
+    "hyperparams": {
+      "lora_rank": 8,
+      "lora_alpha": 16,
+      "lora_dropout": 0.05,
+      "lora_target_modules": ["q_proj"],
+      "training_method": "sft",
+      "train_on_inputs": "auto",
+      "epochs": 2,
+      "n_checkpoints": 1,
+      "n_evals": 1,
+      "batch_size": 2,
+      "gradient_accumulation_steps": 1,
+      "lr_scheduler_type": "cosine",
+      "lr_scheduler_args": {
+        "num_cycles": 0.5
+      },
+      "learning_rate": 0.00001,
+      "warmup_ratio": 0,
+      "max_grad_norm": 1,
+      "weight_decay": 0,
+      "max_seq_len": 4096
+    },
+    "id": "69489a6371be92ae65262127",
+    "job_id": "ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c",
+    "created_at": "2025-12-22T01:09:55.582000",
+    "updated_at": "2025-12-22T01:11:38.493000",
+    "started_at": null,
+    "finished_at": "2025-12-22T01:11:37.910000",
+    "runtime_seconds": 75,
+    "metrics": {
+      "train_tokens": 655360,
+      "eval_tokens": 81920,
+      "epochs_completed": 2,
+      "steps_completed": 80,
+      "final_train_loss": 2.516598343849182,
+      "eval_loss": 2.447591543197632
+    },
+    "artifacts": {
+      "final_adapter": {
+        "artifact_type": "adapter",
+        "created_at": "2025-12-22T01:11:37.987000",
+        "download_url": "https://uf-adapters.s3.amazonaws.com/69291de48168a67217cb381b/ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c/adapter.tar.zst?AWSAccessKeyId=EXAMPLE_ACCESS_KEY_ID&Signature=EXAMPLE_SIGNATURE&Expires=1768456420"
+      },
+      "checkpoints": []
+    },
+    "usage": {
+      "gpu_type": "L40S",
+      "gpu_count": 1,
+      "gpu_start_at": "2025-12-22T01:10:22.895000",
+      "gpu_end_at": "2025-12-22T01:11:38.196000",
+      "gpu_seconds": 75,
+      "gpu_hours": 0.020917210555555555,
+      "train_tokens": 655360,
+      "eval_tokens": 81920,
+      "tokens_per_step": 8192,
+      "max_seq_len": 4096,
+      "total_steps": 80,
+      "dataset": {
+        "line_count": 80,
+        "size_bytes": 61747,
+        "tokens_estimated": 655360,
+        "schema_type": "instruction"
+      },
+      "artifacts": null,
+      "runtime_seconds": 75,
+      "errors": null
+    },
+    "errors": null,
+    "error_type": null,
+    "error_code": null,
+    "error_message": null,
+    "events": [
+      {
+        "job_id": "ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c",
+        "org_id": "69291de48168a67217cb381b",
+        "event_type": "JOB_START",
+        "message": "Finetuning Job started.",
+        "metadata": null,
+        "timestamp": "2025-12-22T01:10:22.427000",
+        "id": "69489a7e71be92ae6526213c"
+      },
+      {
+        "job_id": "ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c",
+        "org_id": "69291de48168a67217cb381b",
+        "event_type": "PRECHECK_COMPLETE",
+        "message": "Hyperparameters are validated, Preflight checks are completed.",
+        "metadata": null,
+        "timestamp": "2025-12-22T01:10:22.670000",
+        "id": "69489a7e71be92ae6526213e"
+      },
+      {
+        "job_id": "ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c",
+        "org_id": "69291de48168a67217cb381b",
+        "event_type": "MODEL_UPLOAD_COMPLETE",
+        "message": "Model upload has completed.",
+        "metadata": null,
+        "timestamp": "2025-12-22T01:11:37.486000",
+        "id": "69489ac971be92ae65262196"
+      },
+      {
+        "job_id": "ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c",
+        "org_id": "69291de48168a67217cb381b",
+        "event_type": "JOB_COMPLETE",
+        "message": "Finetuning job has completed.",
+        "metadata": null,
+        "timestamp": "2025-12-22T01:11:37.702000",
+        "id": "69489ac971be92ae65262198"
+      }
+    ]
+  }
+}
+```
+
+### Get fine tuning artifacts
+
+**GET {{ BACKEND_HOST_URL }}/v1/fine-tuning/jobs/{job_id}/artifacts**
+
+Get the artifacts for a specific Fine-Tuning Job.
+
+#### Request Parameters
+
+```json
+{
+  "title": "FineTuneJobArtifactsRequest",
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Unique identifier for the fine-tune job. path parameter"
+    },
+    "output_path": {
+      "type": "string",
+      "description": "The path to save the artifacts to. SDK only. query parameter"
+    }
+  },
+  "required": ["job_id", "output_path"]
+}
+```
+
+#### Response Object
+
+```json
+{
+  "title": "FineTuneJobArtifactsResponse",
+  "type": "object",
+  "properties": {
+    "final_adapter": {
+      "type": "object",
+      "description": "Schema for the final adapter artifact.",
+      "title": "FinalAdapter",
+      "properties": {
+        "artifact_type": {
+          "type": "string",
+          "enum": ["adapter"]
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "download_url": {
+          "type": "string"
+        }
+      },
+      "required": ["artifact_type", "created_at", "download_url"]
+    },
+    "checkpoints": {
+      "type": "array",
+      "title": "Checkpoints",
+      "description": "Schema for the checkpoints of a fine-tuning job.",
+      "default": [],
+      "items": {
+        "type": "object",
+        "description": "Schema for a checkpoint artifact.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "artifact_type": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "download_url": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "artifact_type", "created_at", "download_url"]
+      }
+    }
+  }
+}
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/v1/fine-tuning/jobs/ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c/artifacts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+client.fine_tuning.download_adapter(
+    job_id="ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c", output_path="adapter.tar.zst"
+)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+client.fineTuning.downloadAdapter("ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c", {
+  output_path: "adapter.tar.zst",
+});
+```
+
+#### Example Response
+
+```json
+{
+  "final_adapter": {
+    "artifact_type": "adapter",
+    "created_at": "2025-12-22T01:11:37.987000",
+    "download_url": "https://uf-adapters.s3.amazonaws.com/69291de48168a67217cb381b/ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c/adapter.tar.zst?AWSAccessKeyId=EXAMPLE_ACCESS_KEY_ID&Signature=EXAMPLE_SIGNATURE&Expires=1768546803"
+  },
+  "checkpoints": []
 }
 ```

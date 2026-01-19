@@ -9492,3 +9492,149 @@ console.log(filePresignedPostResponse);
   }
 }
 ```
+
+### Preprocess
+
+**GET {{ BACKEND_HOST_URL }}/v1/files/{fileId}/preprocess**
+
+Trigger JSONL file validation/preprocessing.
+
+#### Path Parameters
+
+```json
+{
+  "title": "FilePreprocessPath",
+  "type": "object",
+  "properties": {
+    "fileId": {
+      "type": "string",
+      "description": "The ID of the file to preprocess."
+    }
+  },
+  "required": ["fileId"]
+}
+
+```
+#### Response Object
+```json
+{
+  "title": "CreatePreprocessResponse",
+  "$defs": {
+    "PresignedPostFile": {
+      "type": "object",
+      "title": "PresignedPostFile",
+      "description": "Response schema for presigned post file.",
+      "properties": {
+        "file_id": {
+          "type": "string",
+          "description": "The ID of the file."
+        },
+        "filename": {
+          "type": "string",
+          "description": "The name of the file."
+        },
+        "purpose": {
+          "type": "string",
+          "description": "The purpose of the file."
+        },
+        "size_bytes": {
+          "type": "integer",
+          "description": "The size of the file in bytes."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the file.",
+          "enum": ["pending", "processed"]
+        },
+        "schema_type": {
+          "type": "string",
+          "description": "The type of the schema.",
+          "enum": ["messages", "instruction"]
+        },
+        "line_count": {
+          "type": "integer",
+          "description": "The number of lines in the file."
+        },
+        "created_at": {
+          "type": "string",
+          "description": "The timestamp of the creation of the file."
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "The timestamp of the last update of the file."
+        }
+      },
+      "required": ["file_id", "filename", "purpose", "status", "created_at", "updated_at"]
+    }
+  },
+  "properties": {
+    "file": {
+      "$ref": "#/$defs/PresignedPostFile"
+    }
+  },
+  "required": ["file"]
+}
+
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/v1/files/file-005a5b02-49be-436a-a5bc-6a4eea54e579/preprocess" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+file_preprocess_response = client.files.preprocess(
+    file_id="file-c34dfc38-0c84-4b35-adc3-9367b2d99f86"
+)
+print(file_preprocess_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const preprocessResponse = await client.files.preprocess("file-c34dfc38-0c84-4b35-adc3-9367b2d99f86")
+console.log(preprocessResponse)
+```
+
+#### Example Response
+
+```json
+{
+  "file": {
+    "file_id": "file-c34dfc38-0c84-4b35-adc3-9367b2d99f86",
+    "filename": "sample_validation_2026011901.jsonl",
+    "purpose": "fine-tune",
+    "size_bytes": 13648,
+    "status": "processed",
+    "schema_type": "instruction",
+    "line_count": 20,
+    "tokens_estimated": 3009,
+    "created_at": "2026-01-19T07:29:59.808000",
+    "updated_at": "2026-01-19T07:30:35.338000"
+  }
+}
+```

@@ -9207,3 +9207,288 @@ console.log(fineTuningModelsResponse);
   ]
 }
 ```
+
+## Files
+
+### Generate Presigned Post
+
+**GET {{ BACKEND_HOST_URL }}/v1/files/presigned-post**
+
+Generates a presigned POST request for securely uploading files directly to S3 from a client.
+
+#### Query Parameters
+
+```json
+{
+  "title": "FilePresignedPostQuery",
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string",
+      "description": "The name of the file to upload."
+    },
+    "content_type": {
+      "type": "string",
+      "description": "The content type of the file to upload."
+    },
+    "purpose": {
+      "type": "string",
+      "description": "The intended purpose of the file."
+    }
+  },
+  "required": ["file_name", "content_type"]
+}
+
+```
+#### Response Object
+```json
+{
+  "title": "CreatePresignedPostResponse",
+  "$defs": {
+    "PresignedPostFile": {
+      "type": "object",
+      "title": "PresignedPostFile",
+      "description": "Response schema for presigned post file.",
+      "properties": {
+        "file_id": {
+          "type": "string",
+          "description": "The ID of the file."
+        },
+        "filename": {
+          "type": "string",
+          "description": "The name of the file."
+        },
+        "purpose": {
+          "type": "string",
+          "description": "The purpose of the file."
+        },
+        "size_bytes": {
+          "type": "integer",
+          "description": "The size of the file in bytes."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the file.",
+          "enum": ["pending", "processed"]
+        },
+        "schema_type": {
+          "type": "string",
+          "description": "The type of the schema.",
+          "enum": ["messages", "instruction"]
+        },
+        "line_count": {
+          "type": "integer",
+          "description": "The number of lines in the file."
+        },
+        "created_at": {
+          "type": "string",
+          "description": "The timestamp of the creation of the file."
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "The timestamp of the last update of the file."
+        }
+      },
+      "required": ["file_id", "filename", "purpose", "status", "created_at", "updated_at"]
+    },
+    "PresignedPostUpload": {
+      "type": "object",
+      "title": "PresignedPostUpload",
+      "description": "Response schema for presigned post upload.",
+      "properties": {
+        "fields": {
+          "type": "object",
+          "description": "The fields to upload the file to.",
+          "additionalProperties": true,
+          "properties": {
+            "Content-Type": {
+              "type": "string",
+              "description": "The content type of the file to upload."
+            },
+            "key": {
+              "type": "string",
+              "description": "The key of the file to upload."
+            },
+            "AWSAccessKeyId": {
+              "type": "string",
+              "description": "The AWS access key ID."
+            },
+            "policy": {
+              "type": "string",
+              "description": "The policy of the file to upload."
+            },
+            "signature": {
+              "type": "string",
+              "description": "The signature of the file to upload."
+            },
+            "x-amz-security-token": {
+              "type": "string",
+              "description": "The security token of the file to upload."
+            }
+          },
+          "required": ["Content-Type", "key", "AWSAccessKeyId", "policy", "signature"]
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL to upload the file to."
+        },
+        "method": {
+          "type": "string",
+          "description": "The method to upload the file to.",
+          "enum": ["POST"]
+        },
+        "headers": {
+          "type": "object",
+          "description": "The headers to upload the file to.",
+          "properties": {
+            "Content-Type": {
+              "type": "string",
+              "description": "The content type of the file to upload."
+            }
+          }
+        }
+      },
+      "required": ["fields", "url", "method", "headers"]
+    },
+    "FineTunePresignedPostResponse": {
+      "type": "object",
+      "title": "FineTunePresignedPostResponse",
+      "description": "Response schema for fine-tune presigned post.",
+      "properties": {
+        "file": {
+          "$ref": "#/$defs/PresignedPostFile"
+        },
+        "upload": {
+          "$ref": "#/$defs/PresignedPostUpload"
+        }
+      },
+      "required": ["file", "upload"]
+    },
+    "GenericPresignedPostResponse": {
+      "type": "object",
+      "title": "GenericPresignedPostResponse",
+      "description": "Response schema for generic presigned post.",
+      "properties": {
+        "filename": {
+          "type": "string",
+          "description": "The name of the file to upload."
+        },
+        "fields": {
+          "type": "object",
+          "description": "The fields to upload the file to."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the presigned post.",
+          "enum": ["PresignedPostGenerated"]
+        },
+        "content_type": {
+          "type": "string",
+          "description": "The content type of the file to upload."
+        },
+        "requested_at": {
+          "type": "string",
+          "description": "The timestamp of the request."
+        },
+        "expires_in": {
+          "type": "integer",
+          "description": "The number of seconds until the presigned post expires.",
+          "enum": [3600]
+        }
+      },
+      "required": ["filename", "fields", "status", "content_type", "requested_at", "expires_in"]
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/FineTunePresignedPostResponse"
+    },
+    {
+      "$ref": "#/$defs/GenericPresignedPostResponse"
+    }
+  ]
+}
+
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/v1/files/presigned-post?file_name=sample_validation_2026011901.jsonl&content_type=application/jsonl&purpose=fine-tune" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+file_presigned_post_response = client.files.presigned_post(
+    file_name="sample_validation_2026011901.jsonl",
+    content_type="application/jsonl",
+    purpose="fine-tune",
+)
+
+print(file_presigned_post_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const filePresignedPostResponse = await client.files.presignedPost({
+  file_name: "sample_validation_2026011901.jsonl",
+  content_type: "application/jsonl",
+  purpose: "fine-tune",
+})
+console.log(filePresignedPostResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "file": {
+    "file_id": "file-005a5b02-49be-436a-a5bc-6a4eea54e579",
+    "filename": "sample_validation_2026011901.jsonl",
+    "purpose": "fine-tune",
+    "size_bytes": null,
+    "status": "pending",
+    "schema_type": null,
+    "line_count": null,
+    "created_at": "2026-01-19T04:06:04.866974Z",
+    "updated_at": "2026-01-19T04:06:04.866974Z"
+  },
+  "upload": {
+    "fields": {
+      "Content-Type": "application/jsonl",
+      "key": "69291de48168a67217cb381b/sample_validation_2026011901.jsonl",
+      "AWSAccessKeyId": "EXAMPLE_ACCESS_KEY_ID",
+      "policy": "EXAMPLE_POLICY",
+      "signature": "EXAMPLE_SIGNATURE"
+    },
+    "url": "EXAMPLE_URL",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/jsonl"
+    }
+  }
+}
+```

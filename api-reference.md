@@ -9641,7 +9641,7 @@ console.log(preprocessResponse)
 
 ### Upload File
 
-**GET {{ BACKEND_HOST_URL }}/openai/v1/files**
+**POST {{ BACKEND_HOST_URL }}/openai/v1/files**
 
 Uploads a file to external storage (S3) and creates corresponding metadata in MongoDB.
 
@@ -10025,3 +10025,105 @@ console.log(fileRetrieveResponse);
 }
 ```
 
+### Delete file
+
+**DELETE {{ BACKEND_HOST_URL }}/openai/v1/files/{file_id}**
+
+Delete a file and remove it from all vector stores.
+
+#### Path parameters
+```json
+{
+  "title": "RetrieveFilePath",
+  "type": "object",
+  "properties": {
+    "purpose": {
+      "file_id": "string",
+      "description": "The ID of the file to use for this request."
+    }
+  },
+  "required": ["file_id"]
+}
+
+```
+
+#### Response Object
+```json
+{
+  "title": "DeletefileResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The ID of the file that was deleted."
+    },
+    "object": {
+      "type": "string",
+      "description": "The object type, which is always file.",
+      "enum": ["file"]
+    },
+    "deleted": {
+      "type": "boolean",
+      "enum": [true],
+      "description": "Whether the file was deleted successfully."
+    }
+  },
+  "required": ["id", "object", "deleted"]
+}
+
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/files/file_28f39cd501824a56860be1a32" \
+  -X DELETE \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+delete_file_response = client.files.delete("file_c32adb98cf0a407cb91a9f038")
+
+print(delete_file_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const deleteFileResponse = await client.files.delete("file_c2f796f89460439facbdce79f");
+
+console.log(deleteFileResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "id": "file_28f39cd501824a56860be1a32",
+  "object": "file",
+  "deleted": true
+}
+```

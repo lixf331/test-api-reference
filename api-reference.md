@@ -10127,3 +10127,74 @@ console.log(deleteFileResponse);
   "deleted": true
 }
 ```
+
+### Retrieve file content
+
+**GET {{ BACKEND_HOST_URL }}/openai/v1/files/{file_id}/content**
+
+Returns the contents of the specified file.
+
+#### Path parameters
+```json
+{
+  "title": "RetrieveFileContentPath",
+  "type": "object",
+  "properties": {
+    "purpose": {
+      "file_id": "string",
+      "description": "The ID of the file to use for this request."
+    }
+  },
+  "required": ["file_id"]
+}
+
+```
+
+#### Returns
+
+The file content.
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/files/file_bf14708e6a3e4b99bf475cc65/content" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+file_content_response = client.files.content("file_bf14708e6a3e4b99bf475cc65")
+
+print(file_content_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const fileContentResponse = await client.files.content("file_bf14708e6a3e4b99bf475cc65");
+
+console.log(fileContentResponse);
+```
+

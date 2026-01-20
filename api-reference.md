@@ -9870,7 +9870,6 @@ print(files_list_response)
 
 ```javascript
 import OpenAI from "openai";
-import fs from "fs";
 
 const client = new OpenAI({
   baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
@@ -9999,7 +9998,6 @@ print(file_retrieve_response)
 
 ```javascript
 import OpenAI from "openai";
-import fs from "fs";
 
 const client = new OpenAI({
   baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
@@ -10105,7 +10103,6 @@ print(delete_file_response)
 
 ```javascript
 import OpenAI from "openai";
-import fs from "fs";
 
 const client = new OpenAI({
   baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
@@ -10185,7 +10182,6 @@ print(file_content_response)
 
 ```javascript
 import OpenAI from "openai";
-import fs from "fs";
 
 const client = new OpenAI({
   baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",

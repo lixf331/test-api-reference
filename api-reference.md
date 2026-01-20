@@ -9908,3 +9908,120 @@ console.log(filesListResponse);
   ]
 }
 ```
+
+### Retrieve file
+
+**GET {{ BACKEND_HOST_URL }}/openai/v1/files/{file_id}**
+
+Returns a list of files that belong to the user, optionally filtered by purpose.
+
+#### Path parameters
+```json
+{
+  "title": "RetrieveFilePath",
+  "type": "object",
+  "properties": {
+    "purpose": {
+      "file_id": "string",
+      "description": "The ID of the file to use for this request."
+    }
+  },
+  "required": ["file_id"]
+}
+
+```
+
+#### Response Object
+```json
+{
+  "title": "RetrieveFileResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The file identifier, which can be referenced in the API endpoints."
+    },
+    "object": {
+      "type": "string",
+      "description": "The object type, which is always file.",
+      "enum": ["file"]
+    },
+    "bytes": {
+      "type": "integer",
+      "description": "The size of the file, in bytes."
+    },
+    "created_at": {
+      "type": "integer",
+      "description": "The Unix timestamp (in seconds) for when the file will expire."
+    },
+    "filename": {
+      "type": "string",
+      "description": "The name of the file."
+    },
+    "purpose": {
+      "type": "string",
+      "description": "The intended purpose of the uploaded file."
+    }
+  },
+  "required": ["id", "object", "bytes", "created_at", "filename", "purpose"]
+}
+
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/files/file_28f39cd501824a56860be1a32" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+file_retrieve_response = client.files.retrieve("file_28f39cd501824a56860be1a32")
+
+print(file_retrieve_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const fileRetrieveResponse = await client.files.retrieve("file_28f39cd501824a56860be1a32");
+
+console.log(fileRetrieveResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "id": "file_28f39cd501824a56860be1a32",
+  "object": "file",
+  "bytes": 827,
+  "created_at": 1768880621,
+  "filename": "batch-li-2026012004.jsonl",
+  "purpose": "batch"
+}
+```
+

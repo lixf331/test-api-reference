@@ -9765,3 +9765,146 @@ console.log(uploadFileResponse);
   "purpose": "batch"
 }
 ```
+
+### List Files
+
+**GET {{ BACKEND_HOST_URL }}/openai/v1/files**
+
+Returns a list of files that belong to the user, optionally filtered by purpose.
+
+#### Query parameters
+```json
+{
+  "title": "ListFilesRequest",
+  "type": "object",
+  "properties": {
+    "purpose": {
+      "type": "string",
+      "description": "Only return files with the given purpose."
+    }
+  }
+}
+
+```
+
+#### Response Object
+```json
+{
+  "title": "ListFilesResponse",
+  "type": "object",
+  "properties": {
+    "object": {
+      "type": "string",
+      "description": "The object type, which is always list.",
+      "enum": ["list"]
+    },
+    "data": {
+      "type": "array",
+      "description": "The list of files.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The file identifier, which can be referenced in the API endpoints."
+          },
+          "object": {
+            "type": "string",
+            "description": "The object type, which is always file.",
+            "enum": ["file"]
+          },
+          "bytes": {
+            "type": "integer",
+            "description": "The size of the file, in bytes."
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "The Unix timestamp (in seconds) for when the file will expire."
+          },
+          "filename": {
+            "type": "string",
+            "description": "The name of the file."
+          },
+          "purpose": {
+            "type": "string",
+            "description": "The intended purpose of the uploaded file."
+          }
+        },
+        "required": ["id", "object", "bytes", "created_at", "filename", "purpose"]
+      }
+    }
+  },
+  "required": ["object", "data"]
+}
+
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/files" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+files_list_response = client.files.list()
+
+print(files_list_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const filesListResponse = await client.files.list();
+
+console.log(filesListResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "file_28f39cd501824a56860be1a32",
+      "object": "file",
+      "bytes": 827,
+      "created_at": 1768880621,
+      "filename": "batch-li-2026012004.jsonl",
+      "purpose": "batch"
+    },
+    {
+      "id": "file_c4eae8d73f26454cb684861d6",
+      "object": "file",
+      "bytes": 827,
+      "created_at": 1768880276,
+      "filename": "batch-li-2026012003.jsonl",
+      "purpose": "batch"
+    }
+  ]
+}
+```

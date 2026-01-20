@@ -9638,3 +9638,130 @@ console.log(preprocessResponse)
   }
 }
 ```
+
+### Upload File
+
+**GET {{ BACKEND_HOST_URL }}/openai/v1/files**
+
+Uploads a file to external storage (S3) and creates corresponding metadata in MongoDB.
+
+#### Multipart/form-data Parameters
+```json
+{
+  "title": "UploadFileRequest",
+  "type": "object",
+  "properties": {
+    "file": {
+      "type": "file",
+      "description": "The File object to be uploaded."
+    },
+    "purpose": {
+      "type": "string",
+      "description": "The intended purpose of the uploaded file. "
+    }
+  },
+  "required": ["file", "purpose"]
+}
+
+```
+
+#### Response Object
+```json
+{
+  "title": "UploadFileResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The file identifier, which can be referenced in the API endpoints."
+    },
+    "object": {
+      "type": "string",
+      "description": "The object type, which is always file.",
+      "enum": ["file"]
+    },
+    "bytes": {
+      "type": "integer",
+      "description": "The size of the file, in bytes."
+    },
+    "created_at": {
+      "type": "integer",
+      "description": "The Unix timestamp (in seconds) for when the file will expire."
+    },
+    "filename": {
+      "type": "string",
+      "description": "The name of the file."
+    },
+    "purpose": {
+      "type": "string",
+      "description": "The intended purpose of the uploaded file."
+    }
+  },
+  "required": ["id", "object", "bytes", "created_at", "filename", "purpose"]
+}
+
+```
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/files" \
+  -X POST \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}" \
+  -F 'file=@"batch-li-2026012001.jsonl"' \
+  -F 'purpose="batch"'
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+upload_file_response = client.files.create(
+    file=open("batch-li-2026012003.jsonl", "rb"), purpose="batch"
+)
+
+print(upload_file_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const uploadFileResponse = await client.files.create({
+  file: fs.createReadStream("batch-li-2026012004.jsonl"),
+  purpose: "batch"
+});
+
+console.log(uploadFileResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "id": "file_c2f796f89460439facbdce79f",
+  "object": "file",
+  "bytes": 827,
+  "created_at": 1768879400,
+  "filename": "batch-li-2026012001.jsonl",
+  "purpose": "batch"
+}
+```

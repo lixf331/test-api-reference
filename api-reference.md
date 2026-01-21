@@ -10470,81 +10470,81 @@ Returns a paginated list of batches.
         "description": "The batch object.",
         "properties": {
           "id": {
-          "type": "string",
-          "description": "The batch ID."
-        },
-        "object": {
-          "type": "string",
-          "description": "The object type, always 'batch'.",
-          "enum": ["batch"]
-        },
-        "endpoint": {
-          "type": "string",
-          "description": "The endpoint for the batch requests."
-        },
-        "input_file_id": {
-          "type": "string",
-          "description": "The ID of the input file."
-        },
-        "completion_window": {
-          "type": "string",
-          "description": "The time frame for the batch completion."
-        },
-        "status": {
-          "type": "string",
-          "description": "The status of the batch job.",
-          "default": "validating"
-        },
-        "output_file_id": {
-          "type": "string",
-          "description": "The ID of the file containing the outputs of successfully executed requests."
-        },
-        "error_file_id": {
-          "type": "string",
-          "description": "The ID of the file containing the outputs of requests with errors."
-        },
-        "request_counts": {
-          "type": "object",
-          "description": "A model to track the total, completed, and failed requests within a batch job.",
-          "properties": {
-            "total": {
-              "type": "integer",
-              "description": "Total number of requests in the batch.",
-              "default": 0
-            },
-            "completed": {
-              "type": "integer",
-              "description": "Number of requests that have been completed successfully.",
-              "default": 0
-            },
-            "failed": {
-              "type": "integer",
-              "description": "Number of requests that have failed.",
-              "default": 0
+            "type": "string",
+            "description": "The batch ID."
+          },
+          "object": {
+            "type": "string",
+            "description": "The object type, always 'batch'.",
+            "enum": ["batch"]
+          },
+          "endpoint": {
+            "type": "string",
+            "description": "The endpoint for the batch requests."
+          },
+          "input_file_id": {
+            "type": "string",
+            "description": "The ID of the input file."
+          },
+          "completion_window": {
+            "type": "string",
+            "description": "The time frame for the batch completion."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the batch job.",
+            "default": "validating"
+          },
+          "output_file_id": {
+            "type": "string",
+            "description": "The ID of the file containing the outputs of successfully executed requests."
+          },
+          "error_file_id": {
+            "type": "string",
+            "description": "The ID of the file containing the outputs of requests with errors."
+          },
+          "request_counts": {
+            "type": "object",
+            "description": "A model to track the total, completed, and failed requests within a batch job.",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "description": "Total number of requests in the batch.",
+                "default": 0
+              },
+              "completed": {
+                "type": "integer",
+                "description": "Number of requests that have been completed successfully.",
+                "default": 0
+              },
+              "failed": {
+                "type": "integer",
+                "description": "Number of requests that have failed.",
+                "default": 0
+              }
             }
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format, and querying for objects via API or the dashboard."
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "The creation timestamp in Unix format."
+          },
+          "expires_at": {
+            "type": "integer",
+            "description": "The expiration timestamp in Unix format."
+          },
+          "completed_at": {
+            "type": "integer"
+          },
+          "failed_at": {
+            "type": "integer"
+          },
+          "cancelled_at": {
+            "type": "integer"
           }
-        },
-        "metadata": {
-          "type": "object",
-          "description": "Key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format, and querying for objects via API or the dashboard."
-        },
-        "created_at": {
-          "type": "integer",
-          "description": "The creation timestamp in Unix format."
-        },
-        "expires_at": {
-          "type": "integer",
-          "description": "The expiration timestamp in Unix format."
-        },
-        "completed_at": {
-          "type": "integer"
-        },
-        "failed_at": {
-          "type": "integer"
-        },
-        "cancelled_at": {
-          "type": "integer"
-        }
         },
         "required": ["id", "endpoint", "input_file_id", "completion_window", "status", "request_counts", "created_at", "expires_at"]
       }
@@ -10654,3 +10654,335 @@ console.log(batchesListResponse);
   "has_more": false
 }
 ```
+
+### Retrieve batch
+
+**GET {{ BACKEND_HOST_URL }}/openai/v1/batches/{batch_id}**
+
+Retrieves a batch.
+
+#### Path parameters
+
+```json
+{
+  "title": "RetrieveBatchPath",
+  "type": "object",
+  "properties": {
+    "batch_id": {
+      "type": "string",
+      "description": "The ID of the batch to retrieve."
+    }
+  },
+  "required": "batch_id"
+}
+
+```
+
+#### Response Object
+
+```json
+{
+  "title": "RetrieveBatchResponse",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The batch ID."
+    },
+    "object": {
+      "type": "string",
+      "description": "The object type, always 'batch'.",
+      "enum": ["batch"]
+    },
+    "endpoint": {
+      "type": "string",
+      "description": "The endpoint for the batch requests."
+    },
+    "input_file_id": {
+      "type": "string",
+      "description": "The ID of the input file."
+    },
+    "completion_window": {
+      "type": "string",
+      "description": "The time frame for the batch completion."
+    },
+    "status": {
+      "type": "string",
+      "description": "The status of the batch job.",
+      "default": "validating"
+    },
+    "output_file_id": {
+      "type": "string",
+      "description": "The ID of the file containing the outputs of successfully executed requests."
+    },
+    "error_file_id": {
+      "type": "string",
+      "description": "The ID of the file containing the outputs of requests with errors."
+    },
+    "request_counts": {
+      "type": "object",
+      "description": "A model to track the total, completed, and failed requests within a batch job.",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "description": "Total number of requests in the batch.",
+          "default": 0
+        },
+        "completed": {
+          "type": "integer",
+          "description": "Number of requests that have been completed successfully.",
+          "default": 0
+        },
+        "failed": {
+          "type": "integer",
+          "description": "Number of requests that have failed.",
+          "default": 0
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format, and querying for objects via API or the dashboard."
+    },
+    "created_at": {
+      "type": "integer",
+      "description": "The creation timestamp in Unix format."
+    },
+    "expires_at": {
+      "type": "integer",
+      "description": "The expiration timestamp in Unix format."
+    },
+    "completed_at": {
+      "type": "integer"
+    },
+    "failed_at": {
+      "type": "integer"
+    },
+    "cancelled_at": {
+      "type": "integer"
+    },
+    "execution_results": {
+      "type": "object",
+      "description": "A model to track the total, completed, and failed requests within a batch job.",
+      "properties": {
+        "total_requests": {
+          "type": "integer",
+          "description": "Total number of requests in the batch.",
+          "default": 0
+        },
+        "processed": {
+          "type": "integer",
+          "description": "Number of requests that have been processed.",
+          "default": 0
+        },
+        "successful": {
+          "type": "integer",
+          "description": "Number of requests that have been processed successfully.",
+          "default": 0
+        },
+        "failed": {
+          "type": "integer",
+          "description": "Number of requests that have been processed unsuccessfully.",
+          "default": 0
+        },
+        "cancelled": {
+          "type": "integer",
+          "description": "Number of requests that have been cancelled.",
+          "default": 0
+        }
+      }
+    }
+  },
+  "required": ["id", "endpoint", "input_file_id", "completion_window", "status", "request_counts", "created_at", "expires_at", "execution_results"]
+}
+
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/batches/batch_276427ed4e2b4f91bac435b8" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+batch_retrieve_response = client.batches.retrieve("batch_276427ed4e2b4f91bac435b8")
+
+print(batch_retrieve_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const batchRetrieveResponse = await client.batches.retrieve("batch_276427ed4e2b4f91bac435b8");
+
+console.log(batchRetrieveResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "id": "batch_276427ed4e2b4f91bac435b8",
+  "object": "batch",
+  "endpoint": "/v1/chat/completions",
+  "input_file_id": "file_4d5cdac3b1004590abc428057",
+  "completion_window": "24h",
+  "status": "completed",
+  "output_file_id": "file_5f0f5f85c2724019a585f14b8",
+  "error_file_id": null,
+  "request_counts": {
+    "total": 3,
+    "completed": 3,
+    "failed": 0
+  },
+  "metadata": null,
+  "created_at": 1768975710,
+  "expires_at": 1769062110,
+  "completed_at": 1768975713,
+  "failed_at": null,
+  "cancelled_at": null,
+  "execution_results": {
+    "total_requests": 3,
+    "processed": 3,
+    "successful": 3,
+    "failed": 0,
+    "cancelled": 0
+  }
+}
+```
+
+### Cancel batch
+
+**POST {{ BACKEND_HOST_URL }}/openai/v1/batches/{batch_id}/cancel**
+
+Initiates the cancellation of a running batch job.
+
+#### Path parameters
+
+```json
+{
+  "title": "CancelBatchPath",
+  "type": "object",
+  "properties": {
+    "batch_id": {
+      "type": "string",
+      "description": "The ID of the batch to cancel."
+    }
+  },
+  "required": "batch_id"
+}
+
+```
+
+#### Response Object
+
+```json
+{
+  "title": "BatchCancelResponse",
+  "properties": {
+    "batch_id": {
+      "type": "string",
+      "description": "The batch ID."
+    },
+    "status": {
+      "type": "string",
+      "description": "The new status of the batch."
+    },
+    "message": {
+      "type": "string",
+      "description": "Cancellation status message."
+    },
+    "task_cancellation_attempted": {
+      "type": "boolean",
+      "description": "Whether task cancellation was attempted."
+    },
+    "previous_status": {
+      "type": "string",
+      "description": "The status before cancellation."
+    }
+  },
+  "required": ["batch_id", "status", "message", "task_cancellation_attempted", "previous_status"]
+}
+
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/batches/batch_276427ed4e2b4f91bac435b8/cancel" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+batch_cancel_response = client.batches.cancel("batch_3cd728fab5be4ee7abc6ca34")
+
+print(batch_cancel_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const batchCancelResponse = await client.batches.cancel("batch_2be0a4d31f844454a674cc24");
+
+console.log(batchCancelResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "batch_id": "batch_2be0a4d31f844454a674cc24",
+  "status": "cancelling",
+  "message": "Batch cancellation initiated successfully",
+  "task_cancellation_attempted": false,
+  "previous_status": "cancelling"
+}
+```
+

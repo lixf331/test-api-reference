@@ -10194,3 +10194,231 @@ const fileContentResponse = await client.files.content("file_bf14708e6a3e4b99bf4
 console.log(fileContentResponse);
 ```
 
+## Batch
+
+### Create batch
+
+**POST {{ BACKEND_HOST_URL }}/openai/v1/batches**
+
+Creates and executes a batch from an uploaded file of requests.
+
+#### Request body
+
+```json
+{
+  "title": "BatchCreateRequest",
+  "type": "object",
+  "properties": {
+    "input_file_id": {
+      "type": "string",
+      "description": "The ID of an uploaded file that contains requests for the new batch."
+    },
+    "endpoint": {
+      "type": "string",
+      "description": "The endpoint to be used for all requests in the batch. Currently /v1/chat/completions is supported."
+    },
+    "completion_window": {
+      "type": "string",
+      "description": "The time frame within which the batch should be processed, e.g., '24h'."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format, and querying for objects via API or the dashboard."
+    }
+  },
+  "required": ["input_file_id", "endpoint", "completion_window"]
+}
+
+```
+
+#### Response Object
+```json
+{
+  "title": "BatchResponse",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The batch ID."
+    },
+    "object": {
+      "type": "string",
+      "description": "The object type, always 'batch'.",
+      "enum": ["batch"]
+    },
+    "endpoint": {
+      "type": "string",
+      "description": "The endpoint for the batch requests."
+    },
+    "errors": {
+      "type": "string"
+    },
+    "input_file_id": {
+      "type": "string",
+      "description": "The ID of the input file."
+    },
+    "completion_window": {
+      "type": "string",
+      "description": "The time frame for the batch completion."
+    },
+    "status": {
+      "type": "string",
+      "description": "The status of the batch job.",
+      "default": "validating"
+    },
+    "output_file_id": {
+      "type": "string",
+      "description": "The ID of the file containing the outputs of successfully executed requests."
+    },
+    "error_file_id": {
+      "type": "string",
+      "description": "The ID of the file containing the outputs of requests with errors."
+    },
+    "finalizing_at": {
+      "type": "string"
+    },
+    "failed_at": {
+      "type": "string"
+    },
+    "expired_at": {
+      "type": "string"
+    },
+    "cancelled_at": {
+      "type": "string"
+    },
+    "request_counts": {
+      "type": "object",
+      "description": "A model to track the total, completed, and failed requests within a batch job.",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "description": "Total number of requests in the batch.",
+          "default": 0
+        },
+        "completed": {
+          "type": "integer",
+          "description": "Number of requests that have been completed successfully.",
+          "default": 0
+        },
+        "failed": {
+          "type": "integer",
+          "description": "Number of requests that have failed.",
+          "default": 0
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format, and querying for objects via API or the dashboard."
+    },
+    "created_at": {
+      "type": "integer",
+      "description": "The creation timestamp in Unix format."
+    },
+    "expires_at": {
+      "type": "integer",
+      "description": "The expiration timestamp in Unix format."
+    },
+    "cancelling_at": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string"
+    },
+    "in_progress_at": {
+      "type": "string"
+    }
+  },
+  "required": ["id", "endpoint", "input_file_id", "completion_window", "created_at", "expires_at"]
+  
+}
+
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/batches" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}" \
+  -d '{
+        "input_file_id": "file_4d5cdac3b1004590abc428057",
+        "endpoint": "/v1/chat/completions",
+        "completion_window": "24h"
+      }'
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+batch_create_response = client.batches.create(
+    input_file_id="file_4d5cdac3b1004590abc428057",
+    endpoint="/v1/chat/completions",
+    completion_window="24h",
+)
+
+print(batch_create_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const batchCreateResponse = await client.batches.create({
+  input_file_id: "file_4d5cdac3b1004590abc428057",
+  endpoint: "/v1/chat/completions",
+  completion_window: "24h"
+});
+
+console.log(batchCreateResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "id": "batch_b6d3934406834dd7b9389cfb",
+  "object": "batch",
+  "endpoint": "/v1/chat/completions",
+  "errors": null,
+  "input_file_id": "file_4d5cdac3b1004590abc428057",
+  "completion_window": "24h",
+  "status": "validating",
+  "output_file_id": null,
+  "error_file_id": null,
+  "finalizing_at": null,
+  "failed_at": null,
+  "expired_at": "2026-01-22T05:51:52Z",
+  "cancelled_at": null,
+  "request_counts": {
+    "total": 3,
+    "completed": 0,
+    "failed": 0
+  },
+  "metadata": null,
+  "created_at": 1768974712,
+  "expires_at": 1769061112,
+  "cancelling_at": null,
+  "completed_at": null,
+  "in_progress_at": null
+}
+```

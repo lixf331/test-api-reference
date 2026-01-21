@@ -10422,3 +10422,235 @@ console.log(batchCreateResponse);
   "in_progress_at": null
 }
 ```
+
+### List batches
+
+**GET {{ BACKEND_HOST_URL }}/openai/v1/batches**
+
+Returns a paginated list of batches.
+
+#### Query parameters
+
+```json
+{
+  "title": "ListBatchesQuery",
+  "type": "object",
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "default": 20,
+      "description": "A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 20."
+    },
+    "after": {
+      "type": "string",
+      "description": "A cursor for use in pagination. after is an object ID that defines your place in the list."
+    }
+  }
+}
+
+```
+
+#### Response Object
+
+```json
+{
+  "title": "ListBatchesResponse",
+  "properties": {
+    "object": {
+      "type": "string",
+      "description": "The object type, always 'list'.",
+      "enum": ["list"]
+    },
+    "data": {
+      "type": "array",
+      "description": "The list of batches.",
+      "items": {
+        "type": "object",
+        "title": "Batch",
+        "description": "The batch object.",
+        "properties": {
+          "id": {
+          "type": "string",
+          "description": "The batch ID."
+        },
+        "object": {
+          "type": "string",
+          "description": "The object type, always 'batch'.",
+          "enum": ["batch"]
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "The endpoint for the batch requests."
+        },
+        "input_file_id": {
+          "type": "string",
+          "description": "The ID of the input file."
+        },
+        "completion_window": {
+          "type": "string",
+          "description": "The time frame for the batch completion."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the batch job.",
+          "default": "validating"
+        },
+        "output_file_id": {
+          "type": "string",
+          "description": "The ID of the file containing the outputs of successfully executed requests."
+        },
+        "error_file_id": {
+          "type": "string",
+          "description": "The ID of the file containing the outputs of requests with errors."
+        },
+        "request_counts": {
+          "type": "object",
+          "description": "A model to track the total, completed, and failed requests within a batch job.",
+          "properties": {
+            "total": {
+              "type": "integer",
+              "description": "Total number of requests in the batch.",
+              "default": 0
+            },
+            "completed": {
+              "type": "integer",
+              "description": "Number of requests that have been completed successfully.",
+              "default": 0
+            },
+            "failed": {
+              "type": "integer",
+              "description": "Number of requests that have failed.",
+              "default": 0
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format, and querying for objects via API or the dashboard."
+        },
+        "created_at": {
+          "type": "integer",
+          "description": "The creation timestamp in Unix format."
+        },
+        "expires_at": {
+          "type": "integer",
+          "description": "The expiration timestamp in Unix format."
+        },
+        "completed_at": {
+          "type": "integer"
+        },
+        "failed_at": {
+          "type": "integer"
+        },
+        "cancelled_at": {
+          "type": "integer"
+        }
+        },
+        "required": ["id", "endpoint", "input_file_id", "completion_window", "status", "request_counts", "created_at", "expires_at"]
+      }
+    },
+    "has_more": {
+      "type": "boolean",
+      "description": "Whether there are more batches to fetch."
+    }
+  },
+  "required": ["object", "data", "has_more"]
+}
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/batches" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+batches_list_response = client.batches.list()
+
+print(batches_list_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const batchesListResponse = await client.batches.list();
+
+console.log(batchesListResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "batch_276427ed4e2b4f91bac435b8",
+      "object": "batch",
+      "endpoint": "/v1/chat/completions",
+      "input_file_id": "file_4d5cdac3b1004590abc428057",
+      "completion_window": "24h",
+      "status": "completed",
+      "output_file_id": "file_5f0f5f85c2724019a585f14b8",
+      "error_file_id": null,
+      "request_counts": {
+        "total": 3,
+        "completed": 3,
+        "failed": 0
+      },
+      "metadata": null,
+      "created_at": 1768975710,
+      "expires_at": 1769062110,
+      "completed_at": 1768975713,
+      "failed_at": null,
+      "cancelled_at": null
+    },
+    {
+      "id": "batch_2d7bc92e1b2e4a38be08e2b7",
+      "object": "batch",
+      "endpoint": "/v1/chat/completions",
+      "input_file_id": "file_4d5cdac3b1004590abc428057",
+      "completion_window": "24h",
+      "status": "completed",
+      "output_file_id": "file_c9a55604c66f4a62a2e9dd8c1",
+      "error_file_id": null,
+      "request_counts": {
+        "total": 3,
+        "completed": 3,
+        "failed": 0
+      },
+      "metadata": null,
+      "created_at": 1768975597,
+      "expires_at": 1769061997,
+      "completed_at": 1768975600,
+      "failed_at": null,
+      "cancelled_at": null
+    }
+  ],
+  "has_more": false
+}
+```

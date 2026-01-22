@@ -11227,6 +11227,124 @@ console.log(modelRetrieveResponse.capabilities);
 }
 ```
 
+## Images
+
+### Create image
+
+**POST {{ BACKEND_HOST_URL }}/openai/v1/images/generations**
+
+Creates an image given a prompt, OpenAI-compatible image generations endpoint.
+
+#### Request body
+
+```json
+{
+  "title": "CreateImageRequest",
+  "type": "object",
+  "properties": {
+    "model": {
+      "type": "string",
+      "description": "ID of the model to use."
+    },
+    "prompt": {
+      "type": "string",
+      "description": "The text prompt describing the image to generate."
+    },
+    "guidance_scale": {
+      "type": "number",
+      "description": "How strictly the model follows the prompt."
+    },
+    "negative_prompt": {
+      "type": "string",
+      "description": "Text describing what to avoid in the generated image."
+    },
+    "num_inference_steps": {
+      "type": "integer",
+      "description": "Number of denoising steps.",
+      "minimum": 12,
+      "maximum": 50
+    },
+    "number_of_images": {
+      "type": "integer",
+      "description": "Number of images to generate.",
+      "minimum": 1,
+      "maximum": 4
+    },
+    "prompt_2": {
+      "type": "string",
+      "description": "Secondary text prompt (for SDXL-based models)."
+    },
+    "negative_prompt_2": {
+      "type": "string",
+      "description": "Secondary negative prompt (for SDXL-based models)."
+    },
+    "crop_coords_top_left": {
+      "description": "Crop coordinates for the top-left corner.",
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    "guidance_rescale": {
+      "type": "number",
+      "description": "Rescale factor for classifier-free guidance.",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "timesteps": {
+      "type": "array",
+      "description": "Custom timesteps for the diffusion process.",
+      "items": {
+        "type": "number"
+      }
+    },
+    "sigmas": {
+      "type": "array",
+      "description": "Custom sigma values for the diffusion process.",
+      "items": {
+        "type": "number"
+      }
+    },
+    "seed": {
+      "type": "integer",
+      "description": "Random seed for reproducibility."
+    }
+  },
+  "required": ["model", "prompt", "guidance_scale"]
+}
+
+```
+
+#### Returns
+
+The image file content.
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/images/generations" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+  -d '{
+        "model": "sdxl-base-1.0",
+        "prompt": "Dog running on the beach",
+        "guidance_scale": 7.5,
+        "num_inference_steps": 20,
+        "number_of_images": 1,
+        "seed": 0
+      }'
+```
+
 ## Audio
 
 ### Create transcription
@@ -11249,6 +11367,16 @@ OpenAI-compatible audio transcriptions endpoint with dynamic validation and stre
     "model": {
       "type": "string",
       "description": "ID of the model to use."
+    },
+    "stream": {
+      "type": "boolean",
+      "description": "Whether to stream the response."
+    },
+    "is_preprocessing_enabled": {
+      "type": "boolean"
+    },
+    "perform_diarization": {
+      "type": "boolean"
     }
   },
   "required": ["file", "model"]

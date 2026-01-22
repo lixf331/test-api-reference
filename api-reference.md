@@ -11111,3 +11111,119 @@ console.log(listModelsResponse);
   ]
 }
 ```
+
+### Retrieve model
+
+**POST {{ BACKEND_HOST_URL }}/openai/v1/models/{model_id}**
+
+Retrieves a model instance.
+
+#### Path parameters
+
+```json
+{
+  "title": "RetrieveModelPath",
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "description": "The ID of the model to use for this request."
+    }
+  },
+  "required": "model_id"
+}
+
+```
+
+#### Response Object
+
+```json
+{
+  "title": "RetrieveModelResponse",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The model ID."
+    },
+    "object": {
+      "type": "string",
+      "description": "The object type, which is always model."
+    },
+    "active": {
+      "type": "boolean",
+      "description": "Whether the model is active."
+    },
+    "capabilities": {
+      "type": "array",
+      "description": "The capabilities of the model.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["id", "object", "active", "capabilities"]
+}
+
+
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/models/openai/gpt-oss-120b" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+model_retrieve_response = client.models.retrieve("openai/gpt-oss-120b")
+
+print(model_retrieve_response.capabilities)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const modelRetrieveResponse = await client.models.retrieve("openai/gpt-oss-120b");
+
+console.log(modelRetrieveResponse.capabilities);
+```
+
+#### Example Response
+
+```json
+{
+  "id": "openai/gpt-oss-120b",
+  "object": "model",
+  "active": true,
+  "capabilities": [
+    "chat",
+    "responses",
+    "playground"
+  ]
+}
+```
+

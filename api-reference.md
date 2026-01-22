@@ -10986,3 +10986,128 @@ console.log(batchCancelResponse);
 }
 ```
 
+## Models
+
+### List models
+
+**GET {{ BACKEND_HOST_URL }}/openai/v1/models**
+
+Lists the currently available models, and provides basic information about each one such as the owner and availability.
+
+#### Response Object
+
+```json
+{
+  "title": "ListModelsResponse",
+  "properties": {
+    "object": {
+      "type": "string",
+      "description": "The object type, which is always list."
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "title": "Model",
+        "description": "A model object.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The model ID."
+          },
+          "object": {
+            "type": "string",
+            "description": "The object type, which is always model."
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Whether the model is active."
+          },
+          "capabilities": {
+            "type": "array",
+            "description": "The capabilities of the model.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["id", "object", "active", "capabilities"]
+      }
+    }
+  },
+  "required": ["object", "data"]
+}
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/models" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+models_list_response = client.models.list()
+
+print(models_list_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const listModelsResponse = await client.models.list();
+
+console.log(listModelsResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "openai/gpt-oss-120b",
+      "object": "model",
+      "active": true,
+      "capabilities": [
+        "chat",
+        "responses",
+        "playground"
+      ]
+    },
+    {
+      "id": "deepseek-ai/DeepSeek-R1",
+      "object": "model",
+      "active": true,
+      "capabilities": [
+        "chat",
+        "playground"
+      ]
+    }
+  ]
+}
+```

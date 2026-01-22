@@ -11227,3 +11227,165 @@ console.log(modelRetrieveResponse.capabilities);
 }
 ```
 
+## Audio
+
+### Create transcription
+
+**POST {{ BACKEND_HOST_URL }}/openai/v1/audio/transcriptions**
+
+OpenAI-compatible audio transcriptions endpoint with dynamic validation and streaming support.
+
+#### Multipart/form-data Parameters
+
+```json
+{
+  "title": "CreateTranscriptionRequest",
+  "type": "object",
+  "properties": {
+    "file": {
+      "type": "file",
+      "description": "The audio file object to transcribe."
+    },
+    "model": {
+      "type": "string",
+      "description": "ID of the model to use."
+    }
+  },
+  "required": ["file", "model"]
+}
+
+```
+
+#### Response Object
+
+```json
+{
+  "title": "CreateTranscriptionResponse",
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "The transcribed text."
+    },
+    "duration": {
+      "type": "number",
+      "description": "The duration of the audio in seconds."
+    },
+    "language": {
+      "type": "string",
+      "description": "The detected language of the audio (e.g., 'en', 'ja', 'unknown')."
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "speaker_count": {
+      "type": "integer"
+    },
+    "speakers": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": ["text", "duration", "language", "segments", "speaker_count", "speakers"]
+}
+```
+
+#### Example Requests
+
+- cURL
+
+```curl
+curl "{{ BACKEND_HOST_URL }}/openai/v1/audio/transcriptions" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+  -F 'file=@"audio.wav"' \
+  -F 'model="openai/whisper-large-v3"'
+```
+
+- OpenAI Python
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{ BACKEND_HOST_URL }}/openai/v1",
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+audio_file = open("audio.wav", "rb")
+
+audio_transcriptions_response = client.audio.transcriptions.create(
+    model="openai/whisper-large-v3", file=audio_file
+)
+
+print(audio_transcriptions_response)
+```
+
+- OpenAI TS
+
+```javascript
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  baseURL: "{{ BACKEND_HOST_URL }}/openai/v1",
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const audioTranscriptionsResponse = await client.audio.transcriptions.create({
+  file: fs.createReadStream("audio.wav"),
+  model: "openai/whisper-large-v3",
+});
+
+console.log(audioTranscriptionsResponse);
+```
+
+#### Example Response
+
+```json
+{
+  "text": "Good morning. Good morning, how are you? I'm fine, thank you.",
+  "duration": 5.6,
+  "language": "en",
+  "segments": [
+    {
+      "id": 0,
+      "speaker": "speaker_1",
+      "start_time": 0,
+      "end_time": 1.2,
+      "text": "Good morning."
+    },
+    {
+      "id": 1,
+      "speaker": "speaker_2",
+      "start_time": 1.5,
+      "end_time": 3.1,
+      "text": "Good morning, how are you?"
+    },
+    {
+      "id": 2,
+      "speaker": "speaker_1",
+      "start_time": 3.4,
+      "end_time": 5.6,
+      "text": "I'm fine, thank you."
+    }
+  ],
+  "speaker_count": 2,
+  "speakers": [
+    "speaker_1",
+    "speaker_2"
+  ]
+}
+```
+
+

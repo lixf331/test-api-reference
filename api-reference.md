@@ -10295,6 +10295,38 @@ curl "{{ BACKEND_HOST_URL }}/openai/v1/files/file_bf14708e6a3e4b99bf475cc65/cont
   -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
 ```
 
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+file_content_response = client.files.content("file_34fa23b690a649ce802ac2dda")
+
+print(file_content_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const fileContentResponse = await client.files.content("file_34fa23b690a649ce802ac2dda");
+
+console.log(fileContentResponse);
+```
+
 - OpenAI Python
 
 ```python

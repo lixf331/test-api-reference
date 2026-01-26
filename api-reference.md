@@ -10992,7 +10992,7 @@ console.log(batchCancelResponse);
 
 **GET {{ BACKEND_HOST_URL }}/openai/v1/models**
 
-Lists the currently available models, and provides basic information about each one such as the owner and availability.
+Lists the currently available models, and provides basic information about each one.
 
 #### Response Object
 

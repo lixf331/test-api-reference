@@ -9657,7 +9657,7 @@ Uploads a file to external storage (S3) and creates corresponding metadata in Mo
     },
     "purpose": {
       "type": "string",
-      "description": "The intended purpose of the uploaded file. "
+      "description": "The intended purpose of the uploaded file."
     }
   },
   "required": ["file", "purpose"]
@@ -9686,7 +9686,7 @@ Uploads a file to external storage (S3) and creates corresponding metadata in Mo
     },
     "created_at": {
       "type": "integer",
-      "description": "The Unix timestamp (in seconds) for when the file will expire."
+      "description": "The Unix timestamp (in seconds) for when the file was created."
     },
     "filename": {
       "type": "string",
@@ -9711,6 +9711,45 @@ curl "{{ BACKEND_HOST_URL }}/openai/v1/files" \
   -H "Authorization: Bearer ${UFCLOUD_API_KEY}" \
   -F 'file=@"batch-li-2026012001.jsonl"' \
   -F 'purpose="batch"'
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+file_create_response = client.files.create(
+    file=open("batch-li-2026012601.jsonl", "rb"),
+    purpose="batch",
+)
+
+print(file_create_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+import fs from "fs";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const fileCreateResponse = await client.files.create({
+  file: fs.createReadStream("batch-li-2026012602.jsonl"),
+  purpose: "batch"
+});
+
+console.log(fileCreateResponse);
 ```
 
 - OpenAI Python
@@ -9819,7 +9858,7 @@ Returns a list of files that belong to the user, optionally filtered by purpose.
           },
           "created_at": {
             "type": "integer",
-            "description": "The Unix timestamp (in seconds) for when the file will expire."
+            "description": "The Unix timestamp (in seconds) for when the file was created."
           },
           "filename": {
             "type": "string",
@@ -9846,6 +9885,38 @@ Returns a list of files that belong to the user, optionally filtered by purpose.
 ```curl
 curl "{{ BACKEND_HOST_URL }}/openai/v1/files" \
   -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+files_list_response = client.files.list()
+
+print(files_list_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const filesListResponse = await client.files.list();
+
+console.log(filesListResponse);
 ```
 
 - OpenAI Python

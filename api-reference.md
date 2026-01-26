@@ -10022,7 +10022,7 @@ Returns a list of files that belong to the user, optionally filtered by purpose.
     },
     "created_at": {
       "type": "integer",
-      "description": "The Unix timestamp (in seconds) for when the file will expire."
+      "description": "The Unix timestamp (in seconds) for when the file was created."
     },
     "filename": {
       "type": "string",
@@ -10045,6 +10045,38 @@ Returns a list of files that belong to the user, optionally filtered by purpose.
 ```curl
 curl "{{ BACKEND_HOST_URL }}/openai/v1/files/file_28f39cd501824a56860be1a32" \
   -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+file_retrieve_response = client.files.retrieve("file_9dfcd74e16574b57bdeb3a465")
+
+print(file_retrieve_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const fileRetrieveResponse = await client.files.retrieve("file_9dfcd74e16574b57bdeb3a465");
+
+console.log(fileRetrieveResponse);
 ```
 
 - OpenAI Python
@@ -10103,7 +10135,7 @@ Delete a file and remove it from all vector stores.
 #### Path parameters
 ```json
 {
-  "title": "RetrieveFilePath",
+  "title": "DeleteFilePath",
   "type": "object",
   "properties": {
     "purpose": {
@@ -10150,6 +10182,38 @@ Delete a file and remove it from all vector stores.
 curl "{{ BACKEND_HOST_URL }}/openai/v1/files/file_28f39cd501824a56860be1a32" \
   -X DELETE \
   -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+delete_file_response = client.files.delete("file_9dfcd74e16574b57bdeb3a465")
+
+print(delete_file_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const deleteFileResponse = await client.files.delete("file_117dd432cde748e2a28cf34cd");
+
+console.log(deleteFileResponse)
 ```
 
 - OpenAI Python

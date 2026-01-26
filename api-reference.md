@@ -11049,6 +11049,38 @@ curl "{{ BACKEND_HOST_URL }}/openai/v1/models" \
   -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
 ```
 
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+models_list_response = client.models.list()
+
+print(models_list_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const modelsListResponse = await client.models.list();
+
+console.log(modelsListResponse);
+```
+
 - OpenAI Python
 
 ```python
@@ -11176,6 +11208,38 @@ Retrieves a model instance.
 curl "{{ BACKEND_HOST_URL }}/openai/v1/models/openai/gpt-oss-120b" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+model_retrieve_response = client.models.retrieve("openai/gpt-oss-120b")
+
+print(model_retrieve_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const modelRetrieveResponse = await client.models.retrieve("openai/gpt-oss-120b");
+
+console.log(modelRetrieveResponse);
 ```
 
 - OpenAI Python

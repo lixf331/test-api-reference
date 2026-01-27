@@ -10401,7 +10401,7 @@ Creates and executes a batch from an uploaded file of requests.
 #### Response Object
 ```json
 {
-  "title": "BatchResponse",
+  "title": "BatchCreateResponse",
   "properties": {
     "id": {
       "type": "string",
@@ -10515,6 +10515,46 @@ curl "{{ BACKEND_HOST_URL }}/openai/v1/batches" \
         "endpoint": "/v1/chat/completions",
         "completion_window": "24h"
       }'
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+batch_create_response = client.batches.create(
+    input_file_id="file_4d5cdac3b1004590abc428057",
+    endpoint="/v1/chat/completions",
+    completion_window="24h",
+)
+
+print(batch_create_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const batchCreateResponse = await client.batches.create({
+  input_file_id: "file_4d5cdac3b1004590abc428057",
+  endpoint: "/v1/chat/completions",
+  completion_window: "24h"
+});
+
+console.log(batchCreateResponse)
 ```
 
 - OpenAI Python
@@ -10733,6 +10773,38 @@ Returns a paginated list of batches.
 curl "{{ BACKEND_HOST_URL }}/openai/v1/batches" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+batches_list_response = client.batches.list()
+
+print(batches_list_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const batchesListResponse = await client.batches.list();
+
+console.log(batchesListResponse)
 ```
 
 - OpenAI Python
@@ -10974,6 +11046,38 @@ curl "{{ BACKEND_HOST_URL }}/openai/v1/batches/batch_276427ed4e2b4f91bac435b8" \
   -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
 ```
 
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+batch_retrieve_response = client.batches.retrieve("batch_6d31c805024d43ea905133fa")
+
+print(batch_retrieve_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const batchRetrieveResponse = await client.batches.retrieve("batch_6d31c805024d43ea905133fa");
+
+console.log(batchRetrieveResponse)
+```
+
 - OpenAI Python
 
 ```python
@@ -11105,6 +11209,38 @@ curl "{{ BACKEND_HOST_URL }}/openai/v1/batches/batch_276427ed4e2b4f91bac435b8/ca
   -X POST \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${UFCLOUD_API_KEY}"
+```
+
+- Python SDK
+
+```python
+import os
+
+from ufcloud import Ufcloud
+
+client = Ufcloud(
+    # This is the default and can be omitted
+    api_key=os.environ.get("UFCLOUD_API_KEY"),
+)
+
+batch_cancel_response = client.batches.cancel("batch_25062fc74a0845f9b32400db")
+
+print(batch_cancel_response)
+```
+
+- TypeScript SDK
+
+```javascript
+import Ufcloud from "ufcloud";
+
+const client = new Ufcloud({
+  // This is the default and can be omitted
+  apiKey: process.env.UFCLOUD_API_KEY,
+});
+
+const batchCancelResponse = await client.batches.cancel("batch_b76b97d1082a44faafe358a4");
+
+console.log(batchCancelResponse)
 ```
 
 - OpenAI Python

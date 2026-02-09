@@ -837,10 +837,35 @@ Creates a model response for the given chat conversation.
     },
     "tools": {
       "type": "array",
+      "description": "A list of tools (functions) the model may call. The model can choose to call one or more of these functions during the conversation. Each tool defines a function with a name, description, and parameters (JSON schema). The model will generate function calls in a structured format when it determines a function should be invoked.",
       "items": {
-        "$ref": "#/$defs/ChatCompletionToolsParam"
-      },
-      "description": "A list of tools (functions) the model may call. The model can choose to call one or more of these functions during the conversation. Each tool defines a function with a name, description, and parameters (JSON schema). The model will generate function calls in a structured format when it determines a function should be invoked."
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["function"],
+            "title": "Type",
+            "default": "function"
+          },
+          "function": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64."
+              },
+              "description": {
+                "type": "string"
+              },
+              "parameters": {
+                "type": "object"
+              }
+            },
+            "required": ["name"]
+          }
+        },
+        "required": ["function"]
+      }
     },
     "tool_choice": {
       "anyOf": [
@@ -8789,7 +8814,7 @@ const client = new Ufcloud({
 });
 
 const fineTuningRetrieveResponse = await client.fineTuning.retrieve(
-  "ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c"
+  "ft-53402ec5-e5c3-4f4b-a9be-c6d7a99b3c1c",
 );
 console.log(fineTuningRetrieveResponse);
 ```
@@ -9238,9 +9263,10 @@ Generates a presigned POST request for securely uploading files directly to S3 f
   },
   "required": ["file_name", "content_type"]
 }
-
 ```
+
 #### Response Object
+
 ```json
 {
   "title": "CreatePresignedPostResponse",
@@ -9289,7 +9315,14 @@ Generates a presigned POST request for securely uploading files directly to S3 f
           "description": "The timestamp of the last update of the file."
         }
       },
-      "required": ["file_id", "filename", "purpose", "status", "created_at", "updated_at"]
+      "required": [
+        "file_id",
+        "filename",
+        "purpose",
+        "status",
+        "created_at",
+        "updated_at"
+      ]
     },
     "PresignedPostUpload": {
       "type": "object",
@@ -9326,7 +9359,13 @@ Generates a presigned POST request for securely uploading files directly to S3 f
               "description": "The security token of the file to upload."
             }
           },
-          "required": ["Content-Type", "key", "AWSAccessKeyId", "policy", "signature"]
+          "required": [
+            "Content-Type",
+            "key",
+            "AWSAccessKeyId",
+            "policy",
+            "signature"
+          ]
         },
         "url": {
           "type": "string",
@@ -9396,7 +9435,14 @@ Generates a presigned POST request for securely uploading files directly to S3 f
           "enum": [3600]
         }
       },
-      "required": ["filename", "fields", "status", "content_type", "requested_at", "expires_in"]
+      "required": [
+        "filename",
+        "fields",
+        "status",
+        "content_type",
+        "requested_at",
+        "expires_in"
+      ]
     }
   },
   "oneOf": [
@@ -9408,7 +9454,6 @@ Generates a presigned POST request for securely uploading files directly to S3 f
     }
   ]
 }
-
 ```
 
 #### Example Requests
@@ -9457,7 +9502,7 @@ const filePresignedPostResponse = await client.files.presignedPost({
   file_name: "sample_validation_2026011901.jsonl",
   content_type: "application/jsonl",
   purpose: "fine-tune",
-})
+});
 console.log(filePresignedPostResponse);
 ```
 
@@ -9513,9 +9558,10 @@ Trigger JSONL file validation/preprocessing.
   },
   "required": ["fileId"]
 }
-
 ```
+
 #### Response Object
+
 ```json
 {
   "title": "CreatePreprocessResponse",
@@ -9564,7 +9610,14 @@ Trigger JSONL file validation/preprocessing.
           "description": "The timestamp of the last update of the file."
         }
       },
-      "required": ["file_id", "filename", "purpose", "status", "created_at", "updated_at"]
+      "required": [
+        "file_id",
+        "filename",
+        "purpose",
+        "status",
+        "created_at",
+        "updated_at"
+      ]
     }
   },
   "properties": {
@@ -9574,7 +9627,6 @@ Trigger JSONL file validation/preprocessing.
   },
   "required": ["file"]
 }
-
 ```
 
 #### Example Requests
@@ -9616,8 +9668,10 @@ const client = new Ufcloud({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const preprocessResponse = await client.files.preprocess("file-c34dfc38-0c84-4b35-adc3-9367b2d99f86")
-console.log(preprocessResponse)
+const preprocessResponse = await client.files.preprocess(
+  "file-c34dfc38-0c84-4b35-adc3-9367b2d99f86",
+);
+console.log(preprocessResponse);
 ```
 
 #### Example Response
@@ -9646,6 +9700,7 @@ console.log(preprocessResponse)
 Uploads a file to external storage (S3) and creates corresponding metadata in MongoDB.
 
 #### Multipart/form-data Parameters
+
 ```json
 {
   "title": "UploadFileRequest",
@@ -9662,10 +9717,10 @@ Uploads a file to external storage (S3) and creates corresponding metadata in Mo
   },
   "required": ["file", "purpose"]
 }
-
 ```
 
 #### Response Object
+
 ```json
 {
   "title": "UploadFileResponse",
@@ -9699,8 +9754,8 @@ Uploads a file to external storage (S3) and creates corresponding metadata in Mo
   },
   "required": ["id", "object", "bytes", "created_at", "filename", "purpose"]
 }
-
 ```
+
 #### Example Requests
 
 - cURL
@@ -9746,7 +9801,7 @@ const client = new Ufcloud({
 
 const fileCreateResponse = await client.files.create({
   file: fs.createReadStream("batch-li-2026012602.jsonl"),
-  purpose: "batch"
+  purpose: "batch",
 });
 
 console.log(fileCreateResponse);
@@ -9786,7 +9841,7 @@ const client = new OpenAI({
 
 const uploadFileResponse = await client.files.create({
   file: fs.createReadStream("batch-li-2026012004.jsonl"),
-  purpose: "batch"
+  purpose: "batch",
 });
 
 console.log(uploadFileResponse);
@@ -9812,6 +9867,7 @@ console.log(uploadFileResponse);
 Returns a list of files that belong to the user, optionally filtered by purpose.
 
 #### Query parameters
+
 ```json
 {
   "title": "ListFilesRequest",
@@ -9823,10 +9879,10 @@ Returns a list of files that belong to the user, optionally filtered by purpose.
     }
   }
 }
-
 ```
 
 #### Response Object
+
 ```json
 {
   "title": "ListFilesResponse",
@@ -9869,13 +9925,19 @@ Returns a list of files that belong to the user, optionally filtered by purpose.
             "description": "The intended purpose of the uploaded file."
           }
         },
-        "required": ["id", "object", "bytes", "created_at", "filename", "purpose"]
+        "required": [
+          "id",
+          "object",
+          "bytes",
+          "created_at",
+          "filename",
+          "purpose"
+        ]
       }
     }
   },
   "required": ["object", "data"]
 }
-
 ```
 
 #### Example Requests
@@ -9986,6 +10048,7 @@ console.log(filesListResponse);
 Returns a list of files that belong to the user, optionally filtered by purpose.
 
 #### Path parameters
+
 ```json
 {
   "title": "RetrieveFilePath",
@@ -9998,10 +10061,10 @@ Returns a list of files that belong to the user, optionally filtered by purpose.
   },
   "required": ["file_id"]
 }
-
 ```
 
 #### Response Object
+
 ```json
 {
   "title": "RetrieveFileResponse",
@@ -10035,7 +10098,6 @@ Returns a list of files that belong to the user, optionally filtered by purpose.
   },
   "required": ["id", "object", "bytes", "created_at", "filename", "purpose"]
 }
-
 ```
 
 #### Example Requests
@@ -10074,7 +10136,9 @@ const client = new Ufcloud({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const fileRetrieveResponse = await client.files.retrieve("file_9dfcd74e16574b57bdeb3a465");
+const fileRetrieveResponse = await client.files.retrieve(
+  "file_9dfcd74e16574b57bdeb3a465",
+);
 
 console.log(fileRetrieveResponse);
 ```
@@ -10108,7 +10172,9 @@ const client = new OpenAI({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const fileRetrieveResponse = await client.files.retrieve("file_28f39cd501824a56860be1a32");
+const fileRetrieveResponse = await client.files.retrieve(
+  "file_28f39cd501824a56860be1a32",
+);
 
 console.log(fileRetrieveResponse);
 ```
@@ -10133,6 +10199,7 @@ console.log(fileRetrieveResponse);
 Delete a file and remove it from all vector stores.
 
 #### Path parameters
+
 ```json
 {
   "title": "DeleteFilePath",
@@ -10145,10 +10212,10 @@ Delete a file and remove it from all vector stores.
   },
   "required": ["file_id"]
 }
-
 ```
 
 #### Response Object
+
 ```json
 {
   "title": "DeletefileResponse",
@@ -10171,7 +10238,6 @@ Delete a file and remove it from all vector stores.
   },
   "required": ["id", "object", "deleted"]
 }
-
 ```
 
 #### Example Requests
@@ -10211,9 +10277,11 @@ const client = new Ufcloud({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const deleteFileResponse = await client.files.delete("file_117dd432cde748e2a28cf34cd");
+const deleteFileResponse = await client.files.delete(
+  "file_117dd432cde748e2a28cf34cd",
+);
 
-console.log(deleteFileResponse)
+console.log(deleteFileResponse);
 ```
 
 - OpenAI Python
@@ -10245,7 +10313,9 @@ const client = new OpenAI({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const deleteFileResponse = await client.files.delete("file_c2f796f89460439facbdce79f");
+const deleteFileResponse = await client.files.delete(
+  "file_c2f796f89460439facbdce79f",
+);
 
 console.log(deleteFileResponse);
 ```
@@ -10267,6 +10337,7 @@ console.log(deleteFileResponse);
 Returns the contents of the specified file.
 
 #### Path parameters
+
 ```json
 {
   "title": "RetrieveFileContentPath",
@@ -10279,7 +10350,6 @@ Returns the contents of the specified file.
   },
   "required": ["file_id"]
 }
-
 ```
 
 #### Returns
@@ -10322,7 +10392,9 @@ const client = new Ufcloud({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const fileContentResponse = await client.files.content("file_34fa23b690a649ce802ac2dda");
+const fileContentResponse = await client.files.content(
+  "file_34fa23b690a649ce802ac2dda",
+);
 
 console.log(fileContentResponse);
 ```
@@ -10356,7 +10428,9 @@ const client = new OpenAI({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const fileContentResponse = await client.files.content("file_bf14708e6a3e4b99bf475cc65");
+const fileContentResponse = await client.files.content(
+  "file_bf14708e6a3e4b99bf475cc65",
+);
 
 console.log(fileContentResponse);
 ```
@@ -10395,10 +10469,10 @@ Creates and executes a batch from an uploaded file of requests.
   },
   "required": ["input_file_id", "endpoint", "completion_window"]
 }
-
 ```
 
 #### Response Object
+
 ```json
 {
   "title": "BatchCreateResponse",
@@ -10495,10 +10569,15 @@ Creates and executes a batch from an uploaded file of requests.
       "type": "string"
     }
   },
-  "required": ["id", "endpoint", "input_file_id", "completion_window", "created_at", "expires_at"]
-  
+  "required": [
+    "id",
+    "endpoint",
+    "input_file_id",
+    "completion_window",
+    "created_at",
+    "expires_at"
+  ]
 }
-
 ```
 
 #### Example Requests
@@ -10551,10 +10630,10 @@ const client = new Ufcloud({
 const batchCreateResponse = await client.batches.create({
   input_file_id: "file_4d5cdac3b1004590abc428057",
   endpoint: "/v1/chat/completions",
-  completion_window: "24h"
+  completion_window: "24h",
 });
 
-console.log(batchCreateResponse)
+console.log(batchCreateResponse);
 ```
 
 - OpenAI Python
@@ -10593,7 +10672,7 @@ const client = new OpenAI({
 const batchCreateResponse = await client.batches.create({
   input_file_id: "file_4d5cdac3b1004590abc428057",
   endpoint: "/v1/chat/completions",
-  completion_window: "24h"
+  completion_window: "24h",
 });
 
 console.log(batchCreateResponse);
@@ -10654,7 +10733,6 @@ Returns a paginated list of batches.
     }
   }
 }
-
 ```
 
 #### Response Object
@@ -10753,7 +10831,16 @@ Returns a paginated list of batches.
             "type": "integer"
           }
         },
-        "required": ["id", "endpoint", "input_file_id", "completion_window", "status", "request_counts", "created_at", "expires_at"]
+        "required": [
+          "id",
+          "endpoint",
+          "input_file_id",
+          "completion_window",
+          "status",
+          "request_counts",
+          "created_at",
+          "expires_at"
+        ]
       }
     },
     "has_more": {
@@ -10804,7 +10891,7 @@ const client = new Ufcloud({
 
 const batchesListResponse = await client.batches.list();
 
-console.log(batchesListResponse)
+console.log(batchesListResponse);
 ```
 
 - OpenAI Python
@@ -10914,7 +11001,6 @@ Retrieves a batch.
   },
   "required": "batch_id"
 }
-
 ```
 
 #### Response Object
@@ -11031,9 +11117,18 @@ Retrieves a batch.
       }
     }
   },
-  "required": ["id", "endpoint", "input_file_id", "completion_window", "status", "request_counts", "created_at", "expires_at", "execution_results"]
+  "required": [
+    "id",
+    "endpoint",
+    "input_file_id",
+    "completion_window",
+    "status",
+    "request_counts",
+    "created_at",
+    "expires_at",
+    "execution_results"
+  ]
 }
-
 ```
 
 #### Example Requests
@@ -11073,9 +11168,11 @@ const client = new Ufcloud({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const batchRetrieveResponse = await client.batches.retrieve("batch_6d31c805024d43ea905133fa");
+const batchRetrieveResponse = await client.batches.retrieve(
+  "batch_6d31c805024d43ea905133fa",
+);
 
-console.log(batchRetrieveResponse)
+console.log(batchRetrieveResponse);
 ```
 
 - OpenAI Python
@@ -11107,7 +11204,9 @@ const client = new OpenAI({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const batchRetrieveResponse = await client.batches.retrieve("batch_276427ed4e2b4f91bac435b8");
+const batchRetrieveResponse = await client.batches.retrieve(
+  "batch_276427ed4e2b4f91bac435b8",
+);
 
 console.log(batchRetrieveResponse);
 ```
@@ -11165,7 +11264,6 @@ Initiates the cancellation of a running batch job.
   },
   "required": "batch_id"
 }
-
 ```
 
 #### Response Object
@@ -11195,9 +11293,14 @@ Initiates the cancellation of a running batch job.
       "description": "The status before cancellation."
     }
   },
-  "required": ["batch_id", "status", "message", "task_cancellation_attempted", "previous_status"]
+  "required": [
+    "batch_id",
+    "status",
+    "message",
+    "task_cancellation_attempted",
+    "previous_status"
+  ]
 }
-
 ```
 
 #### Example Requests
@@ -11238,9 +11341,11 @@ const client = new Ufcloud({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const batchCancelResponse = await client.batches.cancel("batch_b76b97d1082a44faafe358a4");
+const batchCancelResponse = await client.batches.cancel(
+  "batch_b76b97d1082a44faafe358a4",
+);
 
-console.log(batchCancelResponse)
+console.log(batchCancelResponse);
 ```
 
 - OpenAI Python
@@ -11272,7 +11377,9 @@ const client = new OpenAI({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const batchCancelResponse = await client.batches.cancel("batch_2be0a4d31f844454a674cc24");
+const batchCancelResponse = await client.batches.cancel(
+  "batch_2be0a4d31f844454a674cc24",
+);
 
 console.log(batchCancelResponse);
 ```
@@ -11428,20 +11535,13 @@ console.log(listModelsResponse);
       "id": "openai/gpt-oss-120b",
       "object": "model",
       "active": true,
-      "capabilities": [
-        "chat",
-        "responses",
-        "playground"
-      ]
+      "capabilities": ["chat", "responses", "playground"]
     },
     {
       "id": "deepseek-ai/DeepSeek-R1",
       "object": "model",
       "active": true,
-      "capabilities": [
-        "chat",
-        "playground"
-      ]
+      "capabilities": ["chat", "playground"]
     }
   ]
 }
@@ -11467,7 +11567,6 @@ Retrieves a model instance.
   },
   "required": "model_id"
 }
-
 ```
 
 #### Response Object
@@ -11499,8 +11598,6 @@ Retrieves a model instance.
   },
   "required": ["id", "object", "active", "capabilities"]
 }
-
-
 ```
 
 #### Example Requests
@@ -11540,7 +11637,9 @@ const client = new Ufcloud({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const modelRetrieveResponse = await client.models.retrieve("openai/gpt-oss-120b");
+const modelRetrieveResponse = await client.models.retrieve(
+  "openai/gpt-oss-120b",
+);
 
 console.log(modelRetrieveResponse);
 ```
@@ -11574,7 +11673,9 @@ const client = new OpenAI({
   apiKey: process.env.UFCLOUD_API_KEY,
 });
 
-const modelRetrieveResponse = await client.models.retrieve("openai/gpt-oss-120b");
+const modelRetrieveResponse = await client.models.retrieve(
+  "openai/gpt-oss-120b",
+);
 
 console.log(modelRetrieveResponse.capabilities);
 ```
@@ -11586,11 +11687,7 @@ console.log(modelRetrieveResponse.capabilities);
   "id": "openai/gpt-oss-120b",
   "object": "model",
   "active": true,
-  "capabilities": [
-    "chat",
-    "responses",
-    "playground"
-  ]
+  "capabilities": ["chat", "responses", "playground"]
 }
 ```
 
@@ -11686,7 +11783,6 @@ Creates an image given a prompt, OpenAI-compatible image generations endpoint.
   },
   "required": ["model", "prompt", "guidance_scale"]
 }
-
 ```
 
 #### Returns
@@ -11935,13 +12031,7 @@ Image Inpainting.
       "maximum": 1
     }
   },
-  "required": [
-    "model",
-    "prompt",
-    "image",
-    "mask",
-    "guidance_scale"
-  ]
+  "required": ["model", "prompt", "image", "mask", "guidance_scale"]
 }
 ```
 
@@ -12001,7 +12091,6 @@ OpenAI-compatible audio transcriptions endpoint with dynamic validation and stre
   },
   "required": ["file", "model"]
 }
-
 ```
 
 #### Response Object
@@ -12039,7 +12128,14 @@ OpenAI-compatible audio transcriptions endpoint with dynamic validation and stre
       }
     }
   },
-  "required": ["text", "duration", "language", "segments", "speaker_count", "speakers"]
+  "required": [
+    "text",
+    "duration",
+    "language",
+    "segments",
+    "speaker_count",
+    "speakers"
+  ]
 }
 ```
 
@@ -12129,9 +12225,6 @@ console.log(audioTranscriptionsResponse);
     }
   ],
   "speaker_count": 2,
-  "speakers": [
-    "speaker_1",
-    "speaker_2"
-  ]
+  "speakers": ["speaker_1", "speaker_2"]
 }
 ```
